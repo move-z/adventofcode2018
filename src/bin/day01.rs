@@ -10,11 +10,10 @@ fn second(input: &Vec<&str>) -> i32 {
     let mut visited = HashSet::new();
     visited.insert(cur);
 
+    let input: Vec<i32> = input.iter().map(|x| { x.parse::<i32>().unwrap() }).collect();
+
     let mut find = || {
-        input.iter()
-            .map(|s| { s.parse::<i32>().unwrap() })
-            .map(|x| { cur += x; cur })
-            .find(|x| { !visited.insert(*x) })
+        input.iter().map(|x| { cur += x; cur }).find(|x| { !visited.insert(*x) })
     };
 
     loop {
