@@ -1,5 +1,4 @@
 use std::fs;
-use std::io;
 
 fn first(input: &Vec<&str>) -> u32 {
     unimplemented!()

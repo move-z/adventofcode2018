@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["Rodolfo Boer <rodolfo.boer@gmail.com>"]
 
 [dependencies]
+itertools = "0.8.0"
 #regex = "1"
