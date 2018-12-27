@@ -8,7 +8,6 @@ use regex::Regex;
 
 use adventofcode2018::*;
 
-
 fn first(input: &Vec<&str>) -> u32 {
     let claims = input.iter().map(|c| {
         match Claim::new(c) {
@@ -35,7 +34,27 @@ fn first(input: &Vec<&str>) -> u32 {
 }
 
 fn second(input: &Vec<&str>) -> u32 {
-    unimplemented!()
+    let claims: Vec<Claim> = input.iter().map(|c| {
+        match Claim::new(c) {
+            Ok(o) => o,
+            Err(e) => panic!("failed to parse \"{}\": {}", c, e),
+        }
+    }).collect();
+
+    fn overlap(a: &Claim, b: &Claim) -> bool {
+        fn o(ai: usize, af: usize, bi: usize, bf: usize) -> bool {
+            if ai <= bi {
+                af > bi
+            } else {
+                o(bi, bf, ai, af)
+            }
+        };
+        o(a.x, a.x + a.w, b.x, b.x + b.w) && o(a.y, a.y + a.h, b.y, b.y + b.h)
+    }
+
+    claims.iter().find(|a| {
+        claims.iter().find(|&b| { a.id != b.id && overlap(&a, &b) }).is_none()
+    }).unwrap().id as u32
 }
 
 struct Claim {
@@ -73,6 +92,8 @@ fn main() {
     let input: Vec<&str> = input.trim().split("\n").collect();
 
     println!("{}", first(&input));
+
+    println!("{}", second(&input));
 }
 
 #[cfg(test)]
@@ -82,6 +103,11 @@ mod test {
     #[test]
     fn test() {
         assert_eq!(first(&vec!["#1 @ 1,3: 4x4", "#2 @ 3,1: 4x4", "#3 @ 5,5: 2x2"]), 4);
+    }
+
+    #[test]
+    fn test2() {
+        assert_eq!(second(&vec!["#1 @ 1,3: 4x4", "#2 @ 3,1: 4x4", "#3 @ 5,5: 2x2"]), 3);
     }
 }
 
