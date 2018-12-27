@@ -1,5 +1,8 @@
+extern crate adventofcode2018;
+
 use std::collections::HashSet;
-use std::fs;
+
+use adventofcode2018::*;
 
 fn first(input: &Vec<&str>) -> i32 {
     input.iter().map(|x| { x.parse::<i32>().unwrap() }).sum()
@@ -80,9 +83,4 @@ mod test {
     fn test24() {
         assert_eq!(second(&vec!["+7", "+7", "-2", "-7", "-4"]), 14);
     }
-}
-
-fn read_file(day: &str) -> String {
-    let path = format!("input/{}.txt", day);
-    fs::read_to_string(path).unwrap()
 }

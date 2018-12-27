@@ -1,4 +1,6 @@
-use std::fs;
+extern crate adventofcode2018;
+
+use adventofcode2018::*;
 
 fn first(input: &Vec<&str>) -> u32 {
     unimplemented!()
@@ -23,9 +25,4 @@ mod test {
     fn aaa() {
         assert_eq!(first(&vec!["a", "a", "a"]), 3);
     }
-}
-
-fn read_file(day: &str) -> String {
-    let path = format!("input/{}.txt", day);
-    fs::read_to_string(path).unwrap()
 }

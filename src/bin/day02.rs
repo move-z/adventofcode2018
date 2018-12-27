@@ -1,8 +1,9 @@
+extern crate adventofcode2018;
 extern crate itertools;
 
-use std::fs;
-
 use itertools::Itertools;
+
+use adventofcode2018::*;
 
 fn first(input: &Vec<&str>) -> u32 {
     let counts = input.iter().map(|s| { count(s) });
@@ -131,9 +132,4 @@ mod test {
     fn test2() {
         assert_eq!(second(&vec!["abcde", "fghij", "klmno", "pqrst", "fguij", "axcye", "wvxyz"]), "fgij")
     }
-}
-
-fn read_file(day: &str) -> String {
-    let path = format!("input/{}.txt", day);
-    fs::read_to_string(path).unwrap()
 }
