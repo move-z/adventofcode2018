@@ -19,8 +19,49 @@ fn first(input: &Vec<&str>) -> u32 {
     (couples * triples) as u32
 }
 
-fn second(input: &Vec<&str>) -> u32 {
-    unimplemented!()
+fn second(input: &Vec<&str>) -> String {
+    fn diff(a: &str, b: &str) -> Option<String> {
+        fn diff_idx(a: &str, b: &str) -> Option<usize> {
+            if a.len() != b.len() {
+                return None
+            }
+
+            let mut r = None;
+
+            for i in 0..a.len() {
+                if a[i..i+1] != b[i..i+1] {
+                    match r {
+                        Some(_) => {
+                            r = None;
+                            break;
+                        },
+                        None => r = Some(i),
+                    }
+                }
+            }
+
+            r
+        }
+
+        let idx = diff_idx(a, b);
+
+        let mut r = String::from(a.clone());
+
+        idx.map(|i| {
+            r.remove(i);
+            r
+        })
+    }
+
+    for &a in input {
+        for &b in input {
+            if let Some(r) = diff(a, b) {
+                return r;
+            }
+        }
+    }
+
+    String::from("")
 }
 
 type Groups = (bool, bool);
@@ -38,6 +79,8 @@ fn main() {
     let input: Vec<&str> = input.trim().split("\n").collect();
 
     println!("{}", first(&input));
+
+    println!("{}", second(&input));
 }
 
 #[cfg(test)]
@@ -84,6 +127,10 @@ mod test {
         assert_eq!(first(&vec!["abcdef", "bababc", "abbcde", "abcccd", "aabcdd", "abcdee", "ababab"]), 12);
     }
 
+    #[test]
+    fn test2() {
+        assert_eq!(second(&vec!["abcde", "fghij", "klmno", "pqrst", "fguij", "axcye", "wvxyz"]), "fgij")
+    }
 }
 
 fn read_file(day: &str) -> String {
