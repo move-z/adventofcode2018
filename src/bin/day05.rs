@@ -63,7 +63,7 @@ fn main() {
     let input = read_file("05");
     let input: &str = input.trim();
 
-//    println!("{}", first(&input));
+    println!("{}", first(&input));
 
     println!("{}", second(&input));
 }
