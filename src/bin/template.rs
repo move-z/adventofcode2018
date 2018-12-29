@@ -22,7 +22,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn aaa() {
+    fn test() {
         assert_eq!(first(&vec!["a", "a", "a"]), 3);
     }
 }
