@@ -60,12 +60,16 @@ fn strip(input: String) -> String {
 }
 
 fn main() {
+    let start = std::time::Instant::now();
+
     let input = read_file("05");
     let input: &str = input.trim();
 
     println!("{}", first(&input));
 
     println!("{}", second(&input));
+
+    println!("elapsed {:?}", start.elapsed());
 }
 
 #[cfg(test)]

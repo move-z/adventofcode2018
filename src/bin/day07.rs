@@ -126,12 +126,16 @@ fn parse(input: &Vec<&str>) -> HashMap<char, HashSet<char>> {
 }
 
 fn main() {
+    let start = std::time::Instant::now();
+
     let input = read_file("07");
     let input: Vec<&str> = input.trim().split("\n").collect();
 
     println!("{}", first(&input));
 
     println!("{}", second(&input));
+
+    println!("elapsed {:?}", start.elapsed());
 }
 
 #[cfg(test)]

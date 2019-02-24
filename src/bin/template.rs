@@ -11,10 +11,14 @@ fn second(input: &Vec<&str>) -> u32 {
 }
 
 fn main() {
+    let start = std::time::Instant::now();
+
     let input = read_file("01");
     let input: Vec<&str> = input.trim().split("\n").collect();
 
     println!("{}", first(&input));
+
+    println!("elapsed {:?}", start.elapsed());
 }
 
 #[cfg(test)]

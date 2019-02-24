@@ -97,12 +97,16 @@ fn fill_minutes(start_minute: Minute, end_minute: Minute, minutes: &mut HashMap<
 }
 
 fn main() {
+    let start = std::time::Instant::now();
+
     let input = read_file("04");
     let input: Vec<&str> = input.trim().split("\n").collect();
 
     println!("{}", first(&input));
 
     println!("{}", second(&input));
+
+    println!("elapsed {:?}", start.elapsed());
 }
 
 #[cfg(test)]

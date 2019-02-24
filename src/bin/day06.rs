@@ -116,12 +116,16 @@ fn parse(input: &Vec<&str>) -> Vec<Point> {
 }
 
 fn main() {
+    let start = std::time::Instant::now();
+
     let input = read_file("06");
     let input: Vec<&str> = input.trim().split("\n").collect();
 
     println!("{}", first(&input));
 
     println!("{}", second(&input, None));
+
+    println!("elapsed {:?}", start.elapsed());
 }
 
 #[cfg(test)]

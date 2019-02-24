@@ -76,12 +76,16 @@ fn count(input: &str) -> Groups {
 }
 
 fn main() {
+    let start = std::time::Instant::now();
+
     let input = read_file("02");
     let input: Vec<&str> = input.trim().split("\n").collect();
 
     println!("{}", first(&input));
 
     println!("{}", second(&input));
+
+    println!("elapsed {:?}", start.elapsed());
 }
 
 #[cfg(test)]

@@ -57,6 +57,7 @@ fn second(input: &Vec<&str>) -> u32 {
     }).unwrap().id as u32
 }
 
+
 struct Claim {
     id: usize,
     x: usize,
@@ -88,12 +89,16 @@ impl Claim {
 }
 
 fn main() {
+    let start = std::time::Instant::now();
+
     let input = read_file("03");
     let input: Vec<&str> = input.trim().split("\n").collect();
 
     println!("{}", first(&input));
 
     println!("{}", second(&input));
+
+    println!("elapsed {:?}", start.elapsed());
 }
 
 #[cfg(test)]
