@@ -33,7 +33,6 @@ fn second(input: &Vec<usize>) -> usize {
     value(&root)
 }
 
-#[derive(Debug)]
 struct Entry {
     children: Vec<Entry>,
     metadata: Vec<usize>
