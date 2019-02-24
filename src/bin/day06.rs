@@ -133,7 +133,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn test() {
+    fn test1() {
         assert_eq!(first(&vec!["1, 1", "1, 6", "8, 3", "3, 4", "5, 5", "8, 9"]), 17);
     }
 

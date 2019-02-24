@@ -3,30 +3,44 @@ extern crate adventofcode2018;
 use adventofcode2018::*;
 use std::slice::Iter;
 
-fn first(input: &Vec<u32>) -> u32 {
+fn first(input: &Vec<usize>) -> usize {
     let root = build_tree(input);
 
-    fn travel(entry: Entry) -> u32 {
+    fn travel(entry: &Entry) -> usize {
         let mut sum = entry.metadata.iter().sum();
-        for c in entry.children {
+        for c in &entry.children {
             sum += travel(c);
         }
         sum
     }
-    travel(root)
+    travel(&root)
 }
 
-fn second(input: &Vec<u32>) -> u32 {
-    unimplemented!()
+fn second(input: &Vec<usize>) -> usize {
+    let root = build_tree(input);
+
+    fn value(entry: &Entry) -> usize {
+        let v =
+        if entry.children.is_empty() {
+            entry.metadata.iter().sum()
+        } else {
+            entry.metadata.iter().map(|i| {
+                entry.children.get(*i-1).map(|c| { value(c) }).unwrap_or(0)
+            }).sum()
+        };
+        v
+    }
+    value(&root)
 }
 
+#[derive(Debug)]
 struct Entry {
     children: Vec<Entry>,
-    metadata: Vec<u32>
+    metadata: Vec<usize>
 }
 
-fn build_tree(input: &Vec<u32>) -> Entry {
-    fn build_entry(input: &mut Iter<u32>) -> Entry {
+fn build_tree(input: &Vec<usize>) -> Entry {
+    fn build_entry(input: &mut Iter<usize>) -> Entry {
         let children_num = input.next().unwrap();
         let metadata_num = input.next().unwrap();
 
@@ -47,14 +61,15 @@ fn build_tree(input: &Vec<u32>) -> Entry {
     build_entry(&mut input.iter())
 }
 
-
 fn main() {
     let start = std::time::Instant::now();
 
     let input = read_file("08");
-    let input: Vec<u32> = input.trim().split(" ").map(|s| { s.parse().unwrap() }).collect();
+    let input: Vec<usize> = input.trim().split(" ").map(|s| { s.parse().unwrap() }).collect();
 
     println!("{}", first(&input));
+
+    println!("{}", second(&input));
 
     println!("elapsed {:?}", start.elapsed());
 }
@@ -64,7 +79,12 @@ mod test {
     use super::*;
 
     #[test]
-    fn test() {
+    fn test1() {
         assert_eq!(first(&vec![2, 3, 0, 3, 10, 11, 12, 1, 1, 0, 1, 99, 2, 1, 1, 2]), 138);
+    }
+
+    #[test]
+    fn test2() {
+        assert_eq!(second(&vec![2, 3, 0, 3, 10, 11, 12, 1, 1, 0, 1, 99, 2, 1, 1, 2]), 66);
     }
 }
