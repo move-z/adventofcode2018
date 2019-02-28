@@ -1,12 +1,10 @@
-extern crate adventofcode2018;
-
 use adventofcode2018::*;
 
-fn first(input: &Vec<&str>) -> u32 {
+fn first(_input: &Vec<&str>) -> u32 {
     unimplemented!()
 }
 
-fn second(input: &Vec<&str>) -> u32 {
+fn second(_input: &Vec<&str>) -> u32 {
     unimplemented!()
 }
 

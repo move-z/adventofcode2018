@@ -1,28 +1,27 @@
-extern crate adventofcode2018;
-#[macro_use]
-extern crate lazy_static;
+use adventofcode2018::*;
 
 use std::collections::HashMap;
 
+use lazy_static::lazy_static;
 use regex::Regex;
-
-use adventofcode2018::*;
 
 fn first(input: &Vec<&str>) -> u32 {
     let map = parse(input);
-    let guard = map.iter().max_by_key(|g| {
-        g.1.values().sum::<u32>()
-    }).unwrap();
-    let max_min = guard.1.iter().max_by_key(|m| { m.1 }).unwrap().0;
+    let guard = map
+        .iter()
+        .max_by_key(|g| g.1.values().sum::<u32>())
+        .unwrap();
+    let max_min = guard.1.iter().max_by_key(|m| m.1).unwrap().0;
     *max_min as u32 * guard.0
 }
 
 fn second(input: &Vec<&str>) -> u32 {
     let map = parse(input);
-    let guard = map.iter().max_by_key(|g| {
-        g.1.values().max().unwrap()
-    }).unwrap();
-    let max_min = guard.1.iter().max_by_key(|m| { m.1 }).unwrap().0;
+    let guard = map
+        .iter()
+        .max_by_key(|g| g.1.values().max().unwrap())
+        .unwrap();
+    let max_min = guard.1.iter().max_by_key(|m| m.1).unwrap().0;
     *max_min as u32 * guard.0
 }
 
@@ -47,7 +46,7 @@ fn parse(input: &Vec<&str>) -> HashMap<Id, HashMap<Minute, u32>> {
                 r.insert(id.unwrap(), HashMap::new());
             }
 
-            let mut minutes = r.get_mut(&id.unwrap()).unwrap();
+            let minutes = r.get_mut(&id.unwrap()).unwrap();
             fill_minutes(start_minute.unwrap(), end_minute, minutes);
         }
     }
@@ -80,7 +79,7 @@ fn parse_sleep(line: &str) -> Option<Minute> {
 fn parse_wake(line: &str) -> Option<Minute> {
     if let Some(cap) = WAKES_RE.captures(line) {
         let minute = parse_capture(&cap, 1, "minute").unwrap();
-        return Some(minute)
+        return Some(minute);
     }
     None
 }
@@ -114,23 +113,25 @@ mod test {
     use super::*;
 
     fn data<'a>() -> Vec<&'a str> {
-        vec!["[1518-11-01 00:00] Guard #10 begins shift",
-              "[1518-11-01 00:05] falls asleep",
-              "[1518-11-01 00:25] wakes up",
-              "[1518-11-01 00:30] falls asleep",
-              "[1518-11-01 00:55] wakes up",
-              "[1518-11-01 23:58] Guard #99 begins shift",
-              "[1518-11-02 00:40] falls asleep",
-              "[1518-11-02 00:50] wakes up",
-              "[1518-11-03 00:05] Guard #10 begins shift",
-              "[1518-11-03 00:24] falls asleep",
-              "[1518-11-03 00:29] wakes up",
-              "[1518-11-04 00:02] Guard #99 begins shift",
-              "[1518-11-04 00:36] falls asleep",
-              "[1518-11-04 00:46] wakes up",
-              "[1518-11-05 00:03] Guard #99 begins shift",
-              "[1518-11-05 00:45] falls asleep",
-              "[1518-11-05 00:55] wakes up"]
+        vec![
+            "[1518-11-01 00:00] Guard #10 begins shift",
+            "[1518-11-01 00:05] falls asleep",
+            "[1518-11-01 00:25] wakes up",
+            "[1518-11-01 00:30] falls asleep",
+            "[1518-11-01 00:55] wakes up",
+            "[1518-11-01 23:58] Guard #99 begins shift",
+            "[1518-11-02 00:40] falls asleep",
+            "[1518-11-02 00:50] wakes up",
+            "[1518-11-03 00:05] Guard #10 begins shift",
+            "[1518-11-03 00:24] falls asleep",
+            "[1518-11-03 00:29] wakes up",
+            "[1518-11-04 00:02] Guard #99 begins shift",
+            "[1518-11-04 00:36] falls asleep",
+            "[1518-11-04 00:46] wakes up",
+            "[1518-11-05 00:03] Guard #99 begins shift",
+            "[1518-11-05 00:45] falls asleep",
+            "[1518-11-05 00:55] wakes up",
+        ]
     }
 
     #[test]

@@ -1,27 +1,22 @@
-extern crate adventofcode2018;
-#[macro_use]
-extern crate lazy_static;
+use adventofcode2018::*;
 
 use std::collections::HashSet;
 
+use lazy_static::lazy_static;
 use regex::Regex;
 
-use adventofcode2018::*;
-
 fn first(input: &Vec<&str>) -> u32 {
-    let claims = input.iter().map(|c| {
-        match Claim::new(c) {
-            Ok(o) => o,
-            Err(e) => panic!("failed to parse \"{}\": {}", c, e),
-        }
+    let claims = input.iter().map(|c| match Claim::new(c) {
+        Ok(o) => o,
+        Err(e) => panic!("failed to parse \"{}\": {}", c, e),
     });
 
     let mut visited = HashSet::new();
     let mut doubles = HashSet::new();
 
     for claim in claims {
-        for x in claim.x..(claim.x+claim.w) {
-            for y in claim.y..(claim.y+claim.h) {
+        for x in claim.x..(claim.x + claim.w) {
+            for y in claim.y..(claim.y + claim.h) {
                 let k = (x, y);
                 if !visited.insert(k) {
                     doubles.insert(k);
@@ -34,12 +29,13 @@ fn first(input: &Vec<&str>) -> u32 {
 }
 
 fn second(input: &Vec<&str>) -> u32 {
-    let claims: Vec<Claim> = input.iter().map(|c| {
-        match Claim::new(c) {
+    let claims: Vec<Claim> = input
+        .iter()
+        .map(|c| match Claim::new(c) {
             Ok(o) => o,
             Err(e) => panic!("failed to parse \"{}\": {}", c, e),
-        }
-    }).collect();
+        })
+        .collect();
 
     fn overlap(a: &Claim, b: &Claim) -> bool {
         fn o(ai: usize, af: usize, bi: usize, bf: usize) -> bool {
@@ -52,11 +48,17 @@ fn second(input: &Vec<&str>) -> u32 {
         o(a.x, a.x + a.w, b.x, b.x + b.w) && o(a.y, a.y + a.h, b.y, b.y + b.h)
     }
 
-    claims.iter().find(|a| {
-        claims.iter().find(|&b| { a.id != b.id && overlap(&a, &b) }).is_none()
-    }).unwrap().id as u32
+    claims
+        .iter()
+        .find(|a| {
+            claims
+                .iter()
+                .find(|&b| a.id != b.id && overlap(&a, &b))
+                .is_none()
+        })
+        .unwrap()
+        .id as u32
 }
-
 
 struct Claim {
     id: usize,
@@ -82,7 +84,7 @@ impl Claim {
                     h: parse_capture(&cap, 5, "h")?,
                 };
                 Ok(c)
-            },
+            }
             None => Err(format!("failed to parse {}", from)),
         }
     }
@@ -107,12 +109,17 @@ mod test {
 
     #[test]
     fn test1() {
-        assert_eq!(first(&vec!["#1 @ 1,3: 4x4", "#2 @ 3,1: 4x4", "#3 @ 5,5: 2x2"]), 4);
+        assert_eq!(
+            first(&vec!["#1 @ 1,3: 4x4", "#2 @ 3,1: 4x4", "#3 @ 5,5: 2x2"]),
+            4
+        );
     }
 
     #[test]
     fn test2() {
-        assert_eq!(second(&vec!["#1 @ 1,3: 4x4", "#2 @ 3,1: 4x4", "#3 @ 5,5: 2x2"]), 3);
+        assert_eq!(
+            second(&vec!["#1 @ 1,3: 4x4", "#2 @ 3,1: 4x4", "#3 @ 5,5: 2x2"]),
+            3
+        );
     }
 }
-

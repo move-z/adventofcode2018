@@ -1,13 +1,10 @@
-extern crate adventofcode2018;
-#[macro_use]
-extern crate lazy_static;
+use adventofcode2018::*;
 
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use lazy_static::lazy_static;
 use regex::Regex;
-
-use adventofcode2018::*;
 
 fn first(player_num: usize, max_value: usize) -> usize {
     let mut players = Vec::with_capacity(player_num);
@@ -40,16 +37,20 @@ fn second(player_num: usize, max_value: usize) -> usize {
 struct Entry {
     value: usize,
     next: Option<Rc<RefCell<Entry>>>,
-    prev: Option<Rc<RefCell<Entry>>>
+    prev: Option<Rc<RefCell<Entry>>>,
 }
 
 struct List {
-    head: Rc<RefCell<Entry>>
+    head: Rc<RefCell<Entry>>,
 }
 
 impl List {
     fn new(value: usize) -> List {
-        let head = Entry { value, next: None, prev: None };
+        let head = Entry {
+            value,
+            next: None,
+            prev: None,
+        };
         let rc = Rc::new(RefCell::new(head));
         rc.borrow_mut().next = Some(rc.clone());
         rc.borrow_mut().prev = Some(rc.clone());
@@ -57,7 +58,11 @@ impl List {
     }
 
     fn insert(&mut self, value: usize) {
-        let mut head = Entry { value, next: None, prev: None };
+        let mut head = Entry {
+            value,
+            next: None,
+            prev: None,
+        };
         let next = self.head.clone();
         let prev = next.borrow().prev.clone().unwrap();
         head.next = Some(next);
@@ -103,7 +108,8 @@ impl List {
 }
 
 lazy_static! {
-     static ref RE: Regex = Regex::new(r"^(\d+) players; last marble is worth (\d+) points$").unwrap();
+    static ref RE: Regex =
+        Regex::new(r"^(\d+) players; last marble is worth (\d+) points$").unwrap();
 }
 
 fn main() {

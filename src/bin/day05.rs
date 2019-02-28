@@ -1,5 +1,3 @@
-extern crate adventofcode2018;
-
 use adventofcode2018::*;
 
 fn first(input: &str) -> u32 {
@@ -9,25 +7,24 @@ fn first(input: &str) -> u32 {
 fn second(input: &str) -> u32 {
     let stripped = strip(input.to_string());
 
-    let subst = ('a' as u8 ..= 'z' as u8).map(|c| {
-        let cl = c as char;
-        let cu = cl.to_uppercase().next().unwrap();
+    let subst = ('a' as u8..='z' as u8)
+        .map(|c| {
+            let cl = c as char;
+            let cu = cl.to_uppercase().next().unwrap();
 
-        stripped.to_string().replace(cl, "").replace(cu, "")
-    }).filter(|s| {
-        s != &stripped
-    }).map(|s| {
-        strip(s).len()
-    }).min().unwrap();
+            stripped.to_string().replace(cl, "").replace(cu, "")
+        })
+        .filter(|s| s != &stripped)
+        .map(|s| strip(s).len())
+        .min()
+        .unwrap();
 
     subst as u32
 }
 
 fn strip(input: String) -> String {
     fn react(a: char, b: char) -> bool {
-        a != b &&
-            (a.to_lowercase().next().unwrap() == b ||
-             b.to_lowercase().next().unwrap() == a)
+        a != b && (a.to_lowercase().next().unwrap() == b || b.to_lowercase().next().unwrap() == a)
     }
 
     let mut chars = input.chars().collect::<Vec<char>>();
@@ -35,21 +32,26 @@ fn strip(input: String) -> String {
         let mut changed = false;
         let mut last_deleted = None;
 
-        chars = chars.iter().enumerate().filter(|(i, &c)| {
-            let i = *i;
+        chars = chars
+            .iter()
+            .enumerate()
+            .filter(|(i, &c)| {
+                let i = *i;
 
-            let remove = if i > 0 && last_deleted != Some(i - 1) && react(c, chars[i - 1]) {
-                true
-            } else if i < chars.len() - 1 && react(c, chars[i + 1]) {
-                last_deleted = Some(i + 1);
-                true
-            } else {
-                false
-            };
+                let remove = if i > 0 && last_deleted != Some(i - 1) && react(c, chars[i - 1]) {
+                    true
+                } else if i < chars.len() - 1 && react(c, chars[i + 1]) {
+                    last_deleted = Some(i + 1);
+                    true
+                } else {
+                    false
+                };
 
-            changed |= remove;
-            !remove
-        }).map(|(_, c)| { *c }).collect();
+                changed |= remove;
+                !remove
+            })
+            .map(|(_, c)| *c)
+            .collect();
 
         if !changed {
             break;

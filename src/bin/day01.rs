@@ -1,11 +1,9 @@
-extern crate adventofcode2018;
+use adventofcode2018::*;
 
 use std::collections::HashSet;
 
-use adventofcode2018::*;
-
 fn first(input: &Vec<&str>) -> i32 {
-    input.iter().map(|x| { x.parse::<i32>().unwrap() }).sum()
+    input.iter().map(|x| x.parse::<i32>().unwrap()).sum()
 }
 
 fn second(input: &Vec<&str>) -> i32 {
@@ -13,15 +11,21 @@ fn second(input: &Vec<&str>) -> i32 {
     let mut visited = HashSet::new();
     visited.insert(cur);
 
-    let input: Vec<i32> = input.iter().map(|x| { x.parse::<i32>().unwrap() }).collect();
+    let input: Vec<i32> = input.iter().map(|x| x.parse::<i32>().unwrap()).collect();
 
     let mut find = || {
-        input.iter().map(|x| { cur += x; cur }).find(|x| { !visited.insert(*x) })
+        input
+            .iter()
+            .map(|x| {
+                cur += x;
+                cur
+            })
+            .find(|x| !visited.insert(*x))
     };
 
     loop {
         if let Some(i) = find() {
-            return i
+            return i;
         }
     }
 }

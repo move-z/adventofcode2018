@@ -1,6 +1,5 @@
-extern crate adventofcode2018;
-
 use adventofcode2018::*;
+
 use std::slice::Iter;
 
 fn first(input: &Vec<usize>) -> usize {
@@ -20,13 +19,14 @@ fn second(input: &Vec<usize>) -> usize {
     let root = build_tree(input);
 
     fn value(entry: &Entry) -> usize {
-        let v =
-        if entry.children.is_empty() {
+        let v = if entry.children.is_empty() {
             entry.metadata.iter().sum()
         } else {
-            entry.metadata.iter().map(|i| {
-                entry.children.get(*i-1).map(|c| { value(c) }).unwrap_or(0)
-            }).sum()
+            entry
+                .metadata
+                .iter()
+                .map(|i| entry.children.get(*i - 1).map(|c| value(c)).unwrap_or(0))
+                .sum()
         };
         v
     }
@@ -35,7 +35,7 @@ fn second(input: &Vec<usize>) -> usize {
 
 struct Entry {
     children: Vec<Entry>,
-    metadata: Vec<usize>
+    metadata: Vec<usize>,
 }
 
 fn build_tree(input: &Vec<usize>) -> Entry {
@@ -64,7 +64,11 @@ fn main() {
     let start = std::time::Instant::now();
 
     let input = read_file("08");
-    let input: Vec<usize> = input.trim().split(" ").map(|s| { s.parse().unwrap() }).collect();
+    let input: Vec<usize> = input
+        .trim()
+        .split(" ")
+        .map(|s| s.parse().unwrap())
+        .collect();
 
     println!("{}", first(&input));
 
@@ -79,11 +83,17 @@ mod test {
 
     #[test]
     fn test1() {
-        assert_eq!(first(&vec![2, 3, 0, 3, 10, 11, 12, 1, 1, 0, 1, 99, 2, 1, 1, 2]), 138);
+        assert_eq!(
+            first(&vec![2, 3, 0, 3, 10, 11, 12, 1, 1, 0, 1, 99, 2, 1, 1, 2]),
+            138
+        );
     }
 
     #[test]
     fn test2() {
-        assert_eq!(second(&vec![2, 3, 0, 3, 10, 11, 12, 1, 1, 0, 1, 99, 2, 1, 1, 2]), 66);
+        assert_eq!(
+            second(&vec![2, 3, 0, 3, 10, 11, 12, 1, 1, 0, 1, 99, 2, 1, 1, 2]),
+            66
+        );
     }
 }

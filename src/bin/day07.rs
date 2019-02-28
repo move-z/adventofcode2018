@@ -1,13 +1,9 @@
-extern crate adventofcode2018;
-#[macro_use]
-extern crate lazy_static;
-
-use std::collections::HashMap;
-use std::collections::HashSet;
-
-use regex::Regex;
-
 use adventofcode2018::*;
+
+use std::collections::{HashMap, HashSet};
+
+use lazy_static::lazy_static;
+use regex::Regex;
 
 fn first(input: &Vec<&str>) -> String {
     let mut deps = parse(input);
@@ -44,12 +40,18 @@ fn run(input: &mut HashMap<char, HashSet<char>>, worker_num: usize, delay: usize
             }
         }
 
-        let eta = workers.iter().map(|w| { w.1 }).min().unwrap();
-        workers = workers.iter().map(|w| {
-            let new_eta = w.1 - eta;
-            if new_eta == 0 { remove(input, &w.0 ) }
-            (w.0, new_eta)
-        }).filter(|w| { w.1 > 0 }).collect();
+        let eta = workers.iter().map(|w| w.1).min().unwrap();
+        workers = workers
+            .iter()
+            .map(|w| {
+                let new_eta = w.1 - eta;
+                if new_eta == 0 {
+                    remove(input, &w.0)
+                }
+                (w.0, new_eta)
+            })
+            .filter(|w| w.1 > 0)
+            .collect();
         time += eta;
     }
 
@@ -68,7 +70,9 @@ fn travel(input: &mut HashMap<char, HashSet<char>>) -> String {
                 input.remove(next);
                 remove(input, &next);
             }
-            None => { break; }
+            None => {
+                break;
+            }
         }
     }
 
@@ -76,9 +80,10 @@ fn travel(input: &mut HashMap<char, HashSet<char>>) -> String {
 }
 
 fn next(input: &mut HashMap<char, HashSet<char>>) -> Vec<char> {
-    let mut free = input.iter()
-        .filter(|(_, tos)| { tos.is_empty() })
-        .map(|(from, _)| { from.clone() })
+    let mut free = input
+        .iter()
+        .filter(|(_, tos)| tos.is_empty())
+        .map(|(from, _)| from.clone())
         .collect::<Vec<char>>();
     free.sort();
     free
@@ -87,13 +92,14 @@ fn next(input: &mut HashMap<char, HashSet<char>>) -> Vec<char> {
 fn remove(input: &mut HashMap<char, HashSet<char>>, next: &char) {
     let keys = input.clone();
     for k in keys.keys() {
-        let mut tos = input.get_mut(k).unwrap();
+        let tos = input.get_mut(k).unwrap();
         tos.remove(next);
     }
 }
 
 lazy_static! {
-     static ref RE: Regex = Regex::new(r"^Step (.) must be finished before step (.) can begin.$").unwrap();
+    static ref RE: Regex =
+        Regex::new(r"^Step (.) must be finished before step (.) can begin.$").unwrap();
 }
 
 fn parse(input: &Vec<&str>) -> HashMap<char, HashSet<char>> {
@@ -114,7 +120,7 @@ fn parse(input: &Vec<&str>) -> HashMap<char, HashSet<char>> {
             match map.get_mut(&to) {
                 Some(set) => {
                     set.insert(from);
-                },
+                }
                 None => {
                     panic!("can't happen");
                 }
@@ -144,25 +150,37 @@ mod test {
 
     #[test]
     fn test1() {
-        assert_eq!(first(&vec![
-            "Step C must be finished before step A can begin.",
-            "Step C must be finished before step F can begin.",
-            "Step A must be finished before step B can begin.",
-            "Step A must be finished before step D can begin.",
-            "Step B must be finished before step E can begin.",
-            "Step D must be finished before step E can begin.",
-            "Step F must be finished before step E can begin."]), "CABDFE");
+        assert_eq!(
+            first(&vec![
+                "Step C must be finished before step A can begin.",
+                "Step C must be finished before step F can begin.",
+                "Step A must be finished before step B can begin.",
+                "Step A must be finished before step D can begin.",
+                "Step B must be finished before step E can begin.",
+                "Step D must be finished before step E can begin.",
+                "Step F must be finished before step E can begin."
+            ]),
+            "CABDFE"
+        );
     }
 
     #[test]
     fn test2() {
-        assert_eq!(do_second(&vec![
-            "Step C must be finished before step A can begin.",
-            "Step C must be finished before step F can begin.",
-            "Step A must be finished before step B can begin.",
-            "Step A must be finished before step D can begin.",
-            "Step B must be finished before step E can begin.",
-            "Step D must be finished before step E can begin.",
-            "Step F must be finished before step E can begin."], 2, 0), 15);
+        assert_eq!(
+            do_second(
+                &vec![
+                    "Step C must be finished before step A can begin.",
+                    "Step C must be finished before step F can begin.",
+                    "Step A must be finished before step B can begin.",
+                    "Step A must be finished before step D can begin.",
+                    "Step B must be finished before step E can begin.",
+                    "Step D must be finished before step E can begin.",
+                    "Step F must be finished before step E can begin."
+                ],
+                2,
+                0
+            ),
+            15
+        );
     }
 }

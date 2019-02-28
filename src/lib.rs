@@ -1,6 +1,3 @@
-pub extern crate lazy_static;
-pub extern crate regex;
-
 use std::fs;
 use std::str::FromStr;
 
@@ -12,8 +9,11 @@ pub fn read_file(day: &str) -> String {
 }
 
 pub fn parse_capture<F>(cap: &Captures, idx: usize, name: &str) -> Result<F, String>
-    where F: FromStr,
-          <F as std::str::FromStr>::Err: std::fmt::Debug {
+where
+    F: FromStr,
+    <F as std::str::FromStr>::Err: std::fmt::Debug,
+{
     let ma = cap.get(idx).ok_or(format!("{} not found", name))?.as_str();
-    ma.parse::<F>().map_err(|e| { format!("failed to parse {}, {:?}", name, e) })
+    ma.parse::<F>()
+        .map_err(|e| format!("failed to parse {}, {:?}", name, e))
 }
