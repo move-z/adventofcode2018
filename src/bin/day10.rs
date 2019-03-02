@@ -6,21 +6,34 @@ use regex::Regex;
 fn first(input: &Vec<&str>) {
     let points = parse(input);
 
-    for t in 0..50000 {
+    let candidate = (0..50000).map(|t| {
         let conf = conf_at_t(&points, t);
         let minmax = min_max(&conf);
+        (conf, minmax)
+    }).min_by_key(|c| {
+        let minmax = &c.1;
+        (minmax.1.x - minmax.0.x) * (minmax.1.y - minmax.0.y)
+    }).unwrap();
 
-        if (minmax.1.x - minmax.0.x) as usize > points.len() ||
-           (minmax.1.y - minmax.0.y) as usize > 20 {
-            continue;
-        }
-
-        print(&conf, minmax.0, minmax.1);
-    }
+    let (conf, (min, max)) = candidate;
+    print(&conf, min, max);
 }
 
-fn second(input: &Vec<&str>) -> u32 {
-    unimplemented!()
+fn second(input: &Vec<&str>) {
+    let points = parse(input);
+
+    let candidate = (0..50000).map(|t| {
+        let conf = conf_at_t(&points, t);
+        let minmax = min_max(&conf);
+        (conf, minmax, t)
+    }).min_by_key(|c| {
+        let minmax = &c.1;
+        (minmax.1.x - minmax.0.x) * (minmax.1.y - minmax.0.y)
+    }).unwrap();
+
+    let (conf, (min, max), t) = candidate;
+    println!(">>>> TIME={}", t);
+    print(&conf, min, max);
 }
 
 struct Coord {
@@ -55,8 +68,8 @@ fn min_max(conf: &Vec<Coord>) -> (Coord, Coord) {
 }
 
 fn print(conf: &Vec<Coord>, min: Coord, max: Coord) {
-    let width = (max.x - min.x) as usize + 2;
-    let height = (max.y - min.y) as usize + 2;
+    let width = (max.x - min.x) as usize + 3;
+    let height = (max.y - min.y) as usize + 3;
     let separator = "-".repeat(width);
 
     println!("{}", separator);
@@ -139,6 +152,8 @@ fn main() {
     let input: Vec<&str> = input.trim().split("\n").collect();
 
     first(&input);
+
+    second(&input);
 
     println!("elapsed {:?}", start.elapsed());
 }
