@@ -102,16 +102,16 @@ struct Point {
 
 impl Point {
     const fn pos_at_time(&self, t: usize) -> Coord {
-        let x = Point::pos_at_t(self.start_coord.x, self.speedx, t);
-        let y = Point::pos_at_t(self.start_coord.y, self.speedy, t);
+        const fn pos_at_t(start: isize, speed: isize, t: usize) -> isize {
+            start + speed * t as isize
+        }
+
+        let x = pos_at_t(self.start_coord.x, self.speedx, t);
+        let y = pos_at_t(self.start_coord.y, self.speedy, t);
         Coord {
             x,
             y,
         }
-    }
-
-    const fn pos_at_t(start: isize, speed: isize, t: usize) -> isize {
-        start + speed * t as isize
     }
 }
 
