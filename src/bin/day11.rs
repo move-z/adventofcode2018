@@ -46,7 +46,7 @@ fn grid_power(cells: &Vec<Vec<isize>>, x: usize, y: usize, gridsize: usize) -> i
     let mut p = 0;
     for y in y..y + gridsize {
         for x in x..x + gridsize {
-            p += cells.get(y - 1).unwrap().get(x - 1).unwrap();
+            p += cells[y - 1][x - 1];
         }
     }
     p
@@ -58,14 +58,14 @@ fn cached_grid_power(cells: &Vec<Vec<isize>>,
                      gridsize: usize,
                      prev: isize) -> isize {
     let power = if gridsize == 1 {
-        cells.get(y - 1).unwrap().get(x - 1).unwrap().clone()
+        cells[y - 1][x - 1].clone()
     } else {
         let mut p = prev;
         for x in x..x + gridsize {
-            p += cells.get(y + gridsize - 2).unwrap().get(x - 1).unwrap();
+            p += cells[y + gridsize - 2][x - 1];
         }
         for y in y..y + gridsize {
-            p += cells.get(y - 1).unwrap().get(x + gridsize - 2).unwrap();
+            p += cells[y - 1][x + gridsize - 2];
         }
         p
     };
