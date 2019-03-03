@@ -2,11 +2,7 @@ fn first(input: usize) -> (usize, usize) {
     let cells = build_cells(input);
 
     (1..=298)
-        .flat_map(|x| {
-            (1..=298).map(move |y| {
-                (x, y)
-            })
-        })
+        .flat_map(|x| (1..=298).map(move |y| (x, y)))
         .max_by_key(|c| grid_power(&cells, c.0, c.1, 3))
         .unwrap()
 }
@@ -27,7 +23,8 @@ fn second(input: usize) -> (usize, usize, usize) {
             })
         })
         .max_by_key(|r| r.0)
-        .unwrap().1
+        .unwrap()
+        .1
 }
 
 fn build_cells(serial: usize) -> Vec<Vec<isize>> {
@@ -36,12 +33,13 @@ fn build_cells(serial: usize) -> Vec<Vec<isize>> {
         let mut row = Vec::with_capacity(300);
         for x in 1..=300 {
             row.push(power(x, y, serial));
-        };
+        }
         cells.push(row);
-    };
+    }
     cells
 }
 
+#[allow(clippy::ptr_arg)]
 fn grid_power(cells: &Vec<Vec<isize>>, x: usize, y: usize, gridsize: usize) -> isize {
     let mut p = 0;
     for y in y..y + gridsize {
@@ -52,13 +50,16 @@ fn grid_power(cells: &Vec<Vec<isize>>, x: usize, y: usize, gridsize: usize) -> i
     p
 }
 
-fn cached_grid_power(cells: &Vec<Vec<isize>>,
-                     x: usize,
-                     y: usize,
-                     gridsize: usize,
-                     prev: isize) -> isize {
-    let power = if gridsize == 1 {
-        cells[y - 1][x - 1].clone()
+#[allow(clippy::ptr_arg)]
+fn cached_grid_power(
+    cells: &Vec<Vec<isize>>,
+    x: usize,
+    y: usize,
+    gridsize: usize,
+    prev: isize,
+) -> isize {
+    if gridsize == 1 {
+        cells[y - 1][x - 1]
     } else {
         let mut p = prev;
         for x in x..x + gridsize {
@@ -68,9 +69,7 @@ fn cached_grid_power(cells: &Vec<Vec<isize>>,
             p += cells[y - 1][x + gridsize - 2];
         }
         p
-    };
-
-    power
+    }
 }
 
 fn power(x: usize, y: usize, serial: usize) -> isize {

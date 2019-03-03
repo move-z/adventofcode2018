@@ -5,17 +5,17 @@ use std::collections::{HashMap, HashSet};
 use lazy_static::lazy_static;
 use regex::Regex;
 
-fn first(input: &Vec<&str>) -> String {
+fn first(input: &[&str]) -> String {
     let mut deps = parse(input);
 
     travel(&mut deps)
 }
 
-fn second(input: &Vec<&str>) -> usize {
+fn second(input: &[&str]) -> usize {
     do_second(input, 5, 60)
 }
 
-fn do_second(input: &Vec<&str>, worker_num: usize, delay: usize) -> usize {
+fn do_second(input: &[&str], worker_num: usize, delay: usize) -> usize {
     let mut deps = parse(input);
 
     run(&mut deps, worker_num, delay)
@@ -46,7 +46,7 @@ fn run(input: &mut HashMap<char, HashSet<char>>, worker_num: usize, delay: usize
             .map(|w| {
                 let new_eta = w.1 - eta;
                 if new_eta == 0 {
-                    remove(input, &w.0)
+                    remove(input, w.0)
                 }
                 (w.0, new_eta)
             })
@@ -68,7 +68,7 @@ fn travel(input: &mut HashMap<char, HashSet<char>>) -> String {
             Some(next) => {
                 res.push(*next);
                 input.remove(next);
-                remove(input, &next);
+                remove(input, *next);
             }
             None => {
                 break;
@@ -83,17 +83,17 @@ fn next(input: &mut HashMap<char, HashSet<char>>) -> Vec<char> {
     let mut free = input
         .iter()
         .filter(|(_, tos)| tos.is_empty())
-        .map(|(from, _)| from.clone())
+        .map(|(from, _)| *from)
         .collect::<Vec<char>>();
     free.sort();
     free
 }
 
-fn remove(input: &mut HashMap<char, HashSet<char>>, next: &char) {
+fn remove(input: &mut HashMap<char, HashSet<char>>, next: char) {
     let keys = input.clone();
     for k in keys.keys() {
         let tos = input.get_mut(k).unwrap();
-        tos.remove(next);
+        tos.remove(&next);
     }
 }
 
@@ -102,7 +102,7 @@ lazy_static! {
         Regex::new(r"^Step (.) must be finished before step (.) can begin.$").unwrap();
 }
 
-fn parse(input: &Vec<&str>) -> HashMap<char, HashSet<char>> {
+fn parse(input: &[&str]) -> HashMap<char, HashSet<char>> {
     let mut map: HashMap<char, HashSet<char>> = HashMap::new();
 
     for s in input {
@@ -110,12 +110,8 @@ fn parse(input: &Vec<&str>) -> HashMap<char, HashSet<char>> {
             let from = parse_capture::<char>(&cap, 1, "to").unwrap();
             let to = parse_capture::<char>(&cap, 2, "from").unwrap();
 
-            if !map.contains_key(&from) {
-                map.insert(from, HashSet::new());
-            }
-            if !map.contains_key(&to) {
-                map.insert(to, HashSet::new());
-            }
+            map.entry(from).or_insert_with(HashSet::new);
+            map.entry(to).or_insert_with(HashSet::new);
 
             match map.get_mut(&to) {
                 Some(set) => {
@@ -135,7 +131,7 @@ fn main() {
     let start = std::time::Instant::now();
 
     let input = read_file("07");
-    let input: Vec<&str> = input.trim().split("\n").collect();
+    let input: Vec<&str> = input.trim().split('\n').collect();
 
     println!("{}", first(&input));
 

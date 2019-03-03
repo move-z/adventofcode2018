@@ -5,31 +5,31 @@ use std::collections::HashMap;
 use lazy_static::lazy_static;
 use regex::Regex;
 
-fn first(input: &Vec<&str>) -> u32 {
+fn first(input: &[&str]) -> u32 {
     let map = parse(input);
     let guard = map
         .iter()
         .max_by_key(|g| g.1.values().sum::<u32>())
         .unwrap();
     let max_min = guard.1.iter().max_by_key(|m| m.1).unwrap().0;
-    *max_min as u32 * guard.0
+    u32::from(*max_min) * guard.0
 }
 
-fn second(input: &Vec<&str>) -> u32 {
+fn second(input: &[&str]) -> u32 {
     let map = parse(input);
     let guard = map
         .iter()
         .max_by_key(|g| g.1.values().max().unwrap())
         .unwrap();
     let max_min = guard.1.iter().max_by_key(|m| m.1).unwrap().0;
-    *max_min as u32 * guard.0
+    u32::from(*max_min) * guard.0
 }
 
 type Id = u32;
 type Minute = u8;
 
-fn parse(input: &Vec<&str>) -> HashMap<Id, HashMap<Minute, u32>> {
-    let mut input = input.clone();
+fn parse(input: &[&str]) -> HashMap<Id, HashMap<Minute, u32>> {
+    let mut input = input.to_vec();
     input.sort();
 
     let mut r: HashMap<Id, HashMap<Minute, u32>> = HashMap::new();
@@ -42,9 +42,7 @@ fn parse(input: &Vec<&str>) -> HashMap<Id, HashMap<Minute, u32>> {
         } else if let Some(minute) = parse_sleep(&line) {
             start_minute = Some(minute);
         } else if let Some(end_minute) = parse_wake(&line) {
-            if !r.contains_key(&id.unwrap()) {
-                r.insert(id.unwrap(), HashMap::new());
-            }
+            r.entry(id.unwrap()).or_insert_with(HashMap::new);
 
             let minutes = r.get_mut(&id.unwrap()).unwrap();
             fill_minutes(start_minute.unwrap(), end_minute, minutes);
@@ -86,12 +84,7 @@ fn parse_wake(line: &str) -> Option<Minute> {
 
 fn fill_minutes(start_minute: Minute, end_minute: Minute, minutes: &mut HashMap<Minute, u32>) {
     for minute in start_minute..end_minute {
-        if minutes.contains_key(&minute) {
-            let v = minutes.get_mut(&minute).unwrap();
-            *v += 1;
-        } else {
-            minutes.insert(minute, 1);
-        }
+        minutes.entry(minute).and_modify(|v| *v += 1).or_insert(1);
     }
 }
 
@@ -99,7 +92,7 @@ fn main() {
     let start = std::time::Instant::now();
 
     let input = read_file("04");
-    let input: Vec<&str> = input.trim().split("\n").collect();
+    let input: Vec<&str> = input.trim().split('\n').collect();
 
     println!("{}", first(&input));
 

@@ -2,11 +2,11 @@ use adventofcode2018::*;
 
 use std::collections::HashSet;
 
-fn first(input: &Vec<&str>) -> i32 {
+fn first(input: &[&str]) -> i32 {
     input.iter().map(|x| x.parse::<i32>().unwrap()).sum()
 }
 
-fn second(input: &Vec<&str>) -> i32 {
+fn second(input: &[&str]) -> i32 {
     let mut cur = 0;
     let mut visited = HashSet::new();
     visited.insert(cur);
@@ -34,7 +34,7 @@ fn main() {
     let start = std::time::Instant::now();
 
     let input = read_file("01");
-    let input: Vec<&str> = input.trim().split("\n").collect();
+    let input: Vec<&str> = input.trim().split('\n').collect();
 
     println!("{}", first(&input));
 

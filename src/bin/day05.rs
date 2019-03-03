@@ -7,7 +7,7 @@ fn first(input: &str) -> u32 {
 fn second(input: &str) -> u32 {
     let stripped = strip(input.to_string());
 
-    let subst = ('a' as u8..='z' as u8)
+    let subst = (b'a'..=b'z')
         .map(|c| {
             let cl = c as char;
             let cu = cl.to_uppercase().next().unwrap();

@@ -2,7 +2,7 @@ use adventofcode2018::*;
 
 use std::slice::Iter;
 
-fn first(input: &Vec<usize>) -> usize {
+fn first(input: &[usize]) -> usize {
     let root = build_tree(input);
 
     fn travel(entry: &Entry) -> usize {
@@ -15,11 +15,11 @@ fn first(input: &Vec<usize>) -> usize {
     travel(&root)
 }
 
-fn second(input: &Vec<usize>) -> usize {
+fn second(input: &[usize]) -> usize {
     let root = build_tree(input);
 
     fn value(entry: &Entry) -> usize {
-        let v = if entry.children.is_empty() {
+        if entry.children.is_empty() {
             entry.metadata.iter().sum()
         } else {
             entry
@@ -27,8 +27,7 @@ fn second(input: &Vec<usize>) -> usize {
                 .iter()
                 .map(|i| entry.children.get(*i - 1).map(|c| value(c)).unwrap_or(0))
                 .sum()
-        };
-        v
+        }
     }
     value(&root)
 }
@@ -38,7 +37,7 @@ struct Entry {
     metadata: Vec<usize>,
 }
 
-fn build_tree(input: &Vec<usize>) -> Entry {
+fn build_tree(input: &[usize]) -> Entry {
     fn build_entry(input: &mut Iter<usize>) -> Entry {
         let children_num = input.next().unwrap();
         let metadata_num = input.next().unwrap();
@@ -66,7 +65,7 @@ fn main() {
     let input = read_file("08");
     let input: Vec<usize> = input
         .trim()
-        .split(" ")
+        .split(' ')
         .map(|s| s.parse().unwrap())
         .collect();
 

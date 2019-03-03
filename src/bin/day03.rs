@@ -5,7 +5,7 @@ use std::collections::HashSet;
 use lazy_static::lazy_static;
 use regex::Regex;
 
-fn first(input: &Vec<&str>) -> u32 {
+fn first(input: &[&str]) -> u32 {
     let claims = input.iter().map(|c| match Claim::new(c) {
         Ok(o) => o,
         Err(e) => panic!("failed to parse \"{}\": {}", c, e),
@@ -28,7 +28,7 @@ fn first(input: &Vec<&str>) -> u32 {
     doubles.len() as u32
 }
 
-fn second(input: &Vec<&str>) -> u32 {
+fn second(input: &[&str]) -> u32 {
     let claims: Vec<Claim> = input
         .iter()
         .map(|c| match Claim::new(c) {
@@ -94,7 +94,7 @@ fn main() {
     let start = std::time::Instant::now();
 
     let input = read_file("03");
-    let input: Vec<&str> = input.trim().split("\n").collect();
+    let input: Vec<&str> = input.trim().split('\n').collect();
 
     println!("{}", first(&input));
 

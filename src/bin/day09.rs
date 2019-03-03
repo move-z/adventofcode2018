@@ -18,16 +18,14 @@ fn first(player_num: usize, max_value: usize) -> usize {
         if cur % 23 == 0 {
             board.reverse(7);
             let take = board.remove();
-
-            let val = players.get_mut(cur % player_num).unwrap();
-            *val = *val + take + cur;
+            players[cur % player_num] += take + cur;
         } else {
             board.advance(2);
             board.insert(cur);
         }
     }
 
-    players.iter().max().unwrap().clone()
+    *players.iter().max().unwrap()
 }
 
 fn second(player_num: usize, max_value: usize) -> usize {
@@ -86,8 +84,8 @@ impl List {
         prev.borrow_mut().next = Some(next.clone());
         self.head = next.clone();
 
-        let v = head.borrow().value;
-        v
+        let h = head.borrow();
+        h.value
     }
 
     fn advance(&mut self, amount: usize) {

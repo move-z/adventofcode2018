@@ -3,37 +3,42 @@ use adventofcode2018::*;
 use lazy_static::lazy_static;
 use regex::Regex;
 
-fn first(input: &Vec<&str>) {
+fn first(input: &[&str]) {
     let points = parse(input);
 
-    let candidate = (0..50000).map(|t| {
-        let conf = conf_at_t(&points, t);
-        let minmax = min_max(&conf);
-        (conf, minmax)
-    }).min_by_key(|c| {
-        let minmax = &c.1;
-        (minmax.1.x - minmax.0.x) * (minmax.1.y - minmax.0.y)
-    }).unwrap();
+    let candidate = (0..50000)
+        .map(|t| {
+            let conf = conf_at_t(&points, t);
+            let minmax = min_max(&conf);
+            (conf, minmax)
+        })
+        .min_by_key(|c| {
+            let minmax = &c.1;
+            (minmax.1.x - minmax.0.x) * (minmax.1.y - minmax.0.y)
+        })
+        .unwrap();
 
     let (conf, (min, max)) = candidate;
     print(&conf, min, max);
 }
 
-fn second(input: &Vec<&str>) {
+fn second(input: &[&str]) {
     let points = parse(input);
 
-    let candidate = (0..50000).map(|t| {
-        let conf = conf_at_t(&points, t);
-        let minmax = min_max(&conf);
-        (conf, minmax, t)
-    }).min_by_key(|c| {
-        let minmax = &c.1;
-        (minmax.1.x - minmax.0.x) * (minmax.1.y - minmax.0.y)
-    }).unwrap();
+    let candidate = (0..50000)
+        .map(|t| {
+            let conf = conf_at_t(&points, t);
+            let minmax = min_max(&conf);
+            (conf, minmax, t)
+        })
+        .min_by_key(|c| {
+            let minmax = &c.1;
+            (minmax.1.x - minmax.0.x) * (minmax.1.y - minmax.0.y)
+        })
+        .unwrap();
 
-    let (conf, (min, max), t) = candidate;
+    let (_, _, t) = candidate;
     println!(">>>> TIME={}", t);
-    print(&conf, min, max);
 }
 
 struct Coord {
@@ -41,33 +46,33 @@ struct Coord {
     y: isize,
 }
 
-fn min_max(conf: &Vec<Coord>) -> (Coord, Coord) {
-    conf.iter().fold(None, |cur: Option<(Coord, Coord)>, point| {
-        let minmax = match cur {
-            Some((min, max)) => {
-                let minx = min.x.min(point.x);
-                let miny = min.y.min(point.y);
-                let maxx = max.x.max(point.x);
-                let maxy = max.y.max(point.y);
-                (minx, miny, maxx, maxy)
-            }
-            None => {
-                (point.x, point.y, point.x, point.y)
-            }
-        };
-        let min = Coord {
-            x: minmax.0,
-            y: minmax.1,
-        };
-        let max = Coord {
-            x: minmax.2,
-            y: minmax.3,
-        };
-        Some((min, max))
-    }).unwrap()
+fn min_max(conf: &[Coord]) -> (Coord, Coord) {
+    conf.iter()
+        .fold(None, |cur: Option<(Coord, Coord)>, point| {
+            let minmax = match cur {
+                Some((min, max)) => {
+                    let minx = min.x.min(point.x);
+                    let miny = min.y.min(point.y);
+                    let maxx = max.x.max(point.x);
+                    let maxy = max.y.max(point.y);
+                    (minx, miny, maxx, maxy)
+                }
+                None => (point.x, point.y, point.x, point.y),
+            };
+            let min = Coord {
+                x: minmax.0,
+                y: minmax.1,
+            };
+            let max = Coord {
+                x: minmax.2,
+                y: minmax.3,
+            };
+            Some((min, max))
+        })
+        .unwrap()
 }
 
-fn print(conf: &Vec<Coord>, min: Coord, max: Coord) {
+fn print(conf: &[Coord], min: Coord, max: Coord) {
     let width = (max.x - min.x) as usize + 3;
     let height = (max.y - min.y) as usize + 3;
     let separator = "-".repeat(width);
@@ -79,9 +84,7 @@ fn print(conf: &Vec<Coord>, min: Coord, max: Coord) {
     conf.iter().for_each(|c| {
         let rownum = (c.y - min.y) as usize + 1;
         let colnum = (c.x - min.x) as usize + 1;
-        let row = screen.get_mut(rownum).unwrap();
-        let char = row.get_mut(colnum).unwrap();
-        *char = '#';
+        screen[rownum][colnum] = '#';
     });
 
     for row in screen {
@@ -108,36 +111,41 @@ impl Point {
 
         let x = pos_at_t(self.start_coord.x, self.speedx, t);
         let y = pos_at_t(self.start_coord.y, self.speedy, t);
-        Coord {
-            x,
-            y,
-        }
+        Coord { x, y }
     }
 }
 
-fn conf_at_t(points: &Vec<Point>, t: usize) -> Vec<Coord> {
-    points.iter().map(|p| p.pos_at_time(t)).collect::<Vec<Coord>>()
+fn conf_at_t(points: &[Point], t: usize) -> Vec<Coord> {
+    points
+        .iter()
+        .map(|p| p.pos_at_time(t))
+        .collect::<Vec<Coord>>()
 }
 
-fn parse(input: &Vec<&str>) -> Vec<Point> {
-    input.iter().map(|s| {
-        RE.captures(s).map(|c| {
-            let startx = parse_capture::<isize>(&c, 1, "startx").unwrap();
-            let starty = parse_capture::<isize>(&c, 2, "starty").unwrap();
-            let speedx = parse_capture::<isize>(&c, 3, "speedx").unwrap();
-            let speedy = parse_capture::<isize>(&c, 4, "speedy").unwrap();
-            let start_coord = Coord {
-                x: startx,
-                y: starty,
-            };
+fn parse(input: &[&str]) -> Vec<Point> {
+    input
+        .iter()
+        .map(|s| {
+            RE.captures(s)
+                .map(|c| {
+                    let startx = parse_capture::<isize>(&c, 1, "startx").unwrap();
+                    let starty = parse_capture::<isize>(&c, 2, "starty").unwrap();
+                    let speedx = parse_capture::<isize>(&c, 3, "speedx").unwrap();
+                    let speedy = parse_capture::<isize>(&c, 4, "speedy").unwrap();
+                    let start_coord = Coord {
+                        x: startx,
+                        y: starty,
+                    };
 
-            Point {
-                start_coord,
-                speedx,
-                speedy,
-            }
-        }).expect(format!("failed to parse {}", s).as_str())
-    }).collect()
+                    Point {
+                        start_coord,
+                        speedx,
+                        speedy,
+                    }
+                })
+                .unwrap_or_else(|| panic!("failed to parse {}", s))
+        })
+        .collect()
 }
 
 lazy_static! {
@@ -149,7 +157,7 @@ fn main() {
     let start = std::time::Instant::now();
 
     let input = read_file("10");
-    let input: Vec<&str> = input.trim().split("\n").collect();
+    let input: Vec<&str> = input.trim().split('\n').collect();
 
     first(&input);
 
@@ -195,6 +203,7 @@ mod test {
             "position=<-6,  0> velocity=< 2,  0>",
             "position=< 5,  9> velocity=< 1, -2>",
             "position=<14,  7> velocity=<-2,  0>",
-            "position=<-3,  6> velocity=< 2, -1>"]);
+            "position=<-3,  6> velocity=< 2, -1>",
+        ]);
     }
 }

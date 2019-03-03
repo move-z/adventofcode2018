@@ -2,7 +2,7 @@ use adventofcode2018::*;
 
 use itertools::Itertools;
 
-fn first(input: &Vec<&str>) -> u32 {
+fn first(input: &[&str]) -> u32 {
     let counts = input.iter().map(|s| count(s));
     let (couples, triples) = counts.fold((0u32, 0u32), |acc, (c, t)| {
         let mut couples = acc.0;
@@ -21,7 +21,7 @@ fn first(input: &Vec<&str>) -> u32 {
     (couples * triples) as u32
 }
 
-fn second(input: &Vec<&str>) -> String {
+fn second(input: &[&str]) -> String {
     fn diff(a: &str, b: &str) -> Option<String> {
         fn diff_idx(a: &str, b: &str) -> Option<usize> {
             if a.len() != b.len() {
@@ -31,7 +31,7 @@ fn second(input: &Vec<&str>) -> String {
             let mut r = None;
 
             for i in 0..a.len() {
-                if a[i..i + 1] != b[i..i + 1] {
+                if a[i..=i] != b[i..=i] {
                     match r {
                         Some(_) => {
                             r = None;
@@ -47,7 +47,7 @@ fn second(input: &Vec<&str>) -> String {
 
         let idx = diff_idx(a, b);
 
-        let mut r = String::from(a.clone());
+        let mut r = String::from(a);
 
         idx.map(|i| {
             r.remove(i);
@@ -80,7 +80,7 @@ fn main() {
     let start = std::time::Instant::now();
 
     let input = read_file("02");
-    let input: Vec<&str> = input.trim().split("\n").collect();
+    let input: Vec<&str> = input.trim().split('\n').collect();
 
     println!("{}", first(&input));
 

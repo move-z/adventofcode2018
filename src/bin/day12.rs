@@ -18,11 +18,10 @@ fn first(initial: &str, rules: &HashMap<&str, char>) -> isize {
         current = next_state(&current, rules);
     }
 
-    current.char_indices()
+    current
+        .char_indices()
         .filter(|(_, c)| *c == '#')
-        .map(|(i, _)| {
-            i as isize + start_idx
-        })
+        .map(|(i, _)| i as isize + start_idx)
         .sum()
 }
 
@@ -30,12 +29,11 @@ fn second(initial: &str, rules: &HashMap<&str, char>) -> i64 {
     let mut current = String::from(initial);
     let mut start_idx = 0;
 
-    fn count(current: &String, start_idx: isize) -> i64 {
-        current.char_indices()
+    fn count(current: &str, start_idx: isize) -> i64 {
+        current
+            .char_indices()
             .filter(|(_, c)| *c == '#')
-            .map(|(i, _)| {
-                i as i64 + start_idx as i64
-            })
+            .map(|(i, _)| i as i64 + start_idx as i64)
             .sum()
     }
 
@@ -44,7 +42,10 @@ fn second(initial: &str, rules: &HashMap<&str, char>) -> i64 {
     const LIMIT: u64 = 50_000_000_000;
     let mut i = 0u64;
     while i <= LIMIT {
-        visited.insert(current.trim_matches('.').to_owned(), (i, count(&current, start_idx)));
+        visited.insert(
+            current.trim_matches('.').to_owned(),
+            (i, count(&current, start_idx)),
+        );
 
         if !current.starts_with("....") {
             current.insert_str(0, "....");
@@ -71,7 +72,7 @@ fn second(initial: &str, rules: &HashMap<&str, char>) -> i64 {
     count(&current, start_idx)
 }
 
-fn next_state(cur: &String, rules: &HashMap<&str, char>) -> String {
+fn next_state(cur: &str, rules: &HashMap<&str, char>) -> String {
     let mut new = String::from(&cur[..2]);
     for i in 0..cur.len() - 5 {
         let slice = &cur[i..i + 5];
@@ -92,12 +93,12 @@ fn main() {
     let start = std::time::Instant::now();
 
     let input = read_file("12");
-    let input: Vec<&str> = input.trim().split("\n").collect();
+    let input: Vec<&str> = input.trim().split('\n').collect();
 
-    let initial = &input.get(0).unwrap()[15..];
+    let initial = &input[0][15..];
     let mut rules = HashMap::new();
-    &input[2..].iter().for_each(|&s| {
-        let mut s = s.split(" => ").into_iter();
+    input[2..].iter().for_each(|&s| {
+        let mut s = s.split(" => ");
         let rule = s.next().unwrap();
         let res = s.next().unwrap().chars().next().unwrap();
         rules.insert(rule, res);

@@ -13,7 +13,10 @@ where
     F: FromStr,
     <F as std::str::FromStr>::Err: std::fmt::Debug,
 {
-    let ma = cap.get(idx).ok_or(format!("{} not found", name))?.as_str();
+    let ma = cap
+        .get(idx)
+        .ok_or_else(|| format!("{} not found", name))?
+        .as_str();
     ma.parse::<F>()
         .map_err(|e| format!("failed to parse {}, {:?}", name, e))
 }
