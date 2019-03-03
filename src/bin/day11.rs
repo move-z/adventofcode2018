@@ -1,24 +1,76 @@
-use adventofcode2018::*;
-
 fn first(input: usize) -> (usize, usize) {
-    let r =
-        (1..=298)
-            .flat_map(|x| (1..=298).map(move |y| (x, y)))
-            .max_by_key(|c| {
-                let mut p = 0;
-                for x in c.0..c.0+3 {
-                    for y in c.1..c.1+3 {
-                        p += power(x, y, input);
-                    }
-                }
-                p
+    let cells = build_cells(input);
+
+    (1..=298)
+        .flat_map(|x| {
+            (1..=298).map(move |y| {
+                (x, y)
             })
-            .unwrap();
-    r
+        })
+        .max_by_key(|c| grid_power(&cells, c.0, c.1, 3))
+        .unwrap()
 }
 
-fn second(_input: &Vec<&str>) -> u32 {
-    unimplemented!()
+fn second(input: usize) -> (usize, usize, usize) {
+    let cells = build_cells(input);
+    let c = &cells;
+
+    (1..=298)
+        .flat_map(|x| {
+            (1..=298).flat_map(move |y| {
+                let max_size = 300 - x.max(y) + 1;
+                let mut p = 0;
+                (1..=max_size).map(move |s| {
+                    p = cached_grid_power(c, x, y, s, p);
+                    (p, (x, y, s))
+                })
+            })
+        })
+        .max_by_key(|r| r.0)
+        .unwrap().1
+}
+
+fn build_cells(serial: usize) -> Vec<Vec<isize>> {
+    let mut cells = Vec::with_capacity(300);
+    for y in 1..=300 {
+        let mut row = Vec::with_capacity(300);
+        for x in 1..=300 {
+            row.push(power(x, y, serial));
+        };
+        cells.push(row);
+    };
+    cells
+}
+
+fn grid_power(cells: &Vec<Vec<isize>>, x: usize, y: usize, gridsize: usize) -> isize {
+    let mut p = 0;
+    for y in y..y + gridsize {
+        for x in x..x + gridsize {
+            p += cells.get(y - 1).unwrap().get(x - 1).unwrap();
+        }
+    }
+    p
+}
+
+fn cached_grid_power(cells: &Vec<Vec<isize>>,
+                     x: usize,
+                     y: usize,
+                     gridsize: usize,
+                     prev: isize) -> isize {
+    let power = if gridsize == 1 {
+        cells.get(y - 1).unwrap().get(x - 1).unwrap().clone()
+    } else {
+        let mut p = prev;
+        for x in x..x + gridsize {
+            p += cells.get(y + gridsize - 2).unwrap().get(x - 1).unwrap();
+        }
+        for y in y..y + gridsize {
+            p += cells.get(y - 1).unwrap().get(x + gridsize - 2).unwrap();
+        }
+        p
+    };
+
+    power
 }
 
 fn power(x: usize, y: usize, serial: usize) -> isize {
@@ -34,6 +86,8 @@ fn main() {
     let start = std::time::Instant::now();
 
     println!("{:?}", first(5468));
+
+    println!("{:?}", second(5468));
 
     println!("elapsed {:?}", start.elapsed());
 }
@@ -58,8 +112,9 @@ mod test {
     }
 
     #[test]
-    fn test_101_153_71() {
-        assert_eq!(power(101, 153, 71), 4);
+    fn test() {
+        let cells = build_cells(18);
+        assert_eq!(grid_power(&cells, 33, 45, 3), 29);
     }
 
     #[test]
@@ -70,5 +125,15 @@ mod test {
     #[test]
     fn test1_42() {
         assert_eq!(first(42), (21, 61));
+    }
+
+    #[test]
+    fn test2_18() {
+        assert_eq!(second(18), (90, 269, 16));
+    }
+
+    #[test]
+    fn test2_42() {
+        assert_eq!(second(42), (232, 251, 12));
     }
 }
