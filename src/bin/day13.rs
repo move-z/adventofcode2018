@@ -21,6 +21,43 @@ fn first(input: &[&str]) -> (usize, usize) {
     }
 }
 
+fn second(input: &[&str]) -> (usize, usize) {
+    let board = get_board(input);
+    let mut carts = get_carts(input);
+
+    loop {
+        {
+            carts.sort_by_key(|c| (c.x << 8) + c.y);
+        }
+
+        fn coll(curr: &Cart, carts: &mut Vec<Cart>) -> bool {
+            let coll = carts.iter().any(|c| curr.x == c.x && curr.y == c.y);
+
+            if coll {
+                carts.retain(|c| curr.x != c.x || curr.y != c.y);
+            }
+
+            coll
+        }
+
+        let mut new_carts = Vec::new();
+        while !carts.is_empty() {
+            let new_c = move_cart(&board, &carts.remove(0));
+
+            if !coll(&new_c, &mut carts) && !coll(&new_c, &mut new_carts) {
+                new_carts.push(new_c);
+            }
+        }
+
+        if new_carts.len() == 1 {
+            let c = &new_carts[0];
+            return (c.x, c.y);
+        }
+
+        carts = new_carts;
+    }
+}
+
 #[allow(clippy::ptr_arg)]
 fn move_cart(board: &Vec<Vec<Track>>, cart: &Cart) -> Cart {
     let mut cart = cart.clone();
@@ -161,6 +198,8 @@ fn main() {
     let input: Vec<&str> = input.trim_end().split('\n').collect();
 
     println!("{:?}", first(&input));
+
+    println!("{:?}", second(&input));
 
     println!("elapsed {:?}", start.elapsed());
 }
