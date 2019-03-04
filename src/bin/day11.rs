@@ -1,3 +1,5 @@
+use adventofcode2018::*;
+
 fn first(input: usize) -> (usize, usize) {
     let cells = build_cells(input);
 
@@ -83,10 +85,11 @@ fn power(x: usize, y: usize, serial: usize) -> isize {
 
 fn main() {
     let start = std::time::Instant::now();
+    let input = read_file("11").trim().parse::<usize>().unwrap();
 
-    println!("{:?}", first(5468));
+    println!("{:?}", first(input));
 
-    println!("{:?}", second(5468));
+    println!("{:?}", second(input));
 
     println!("elapsed {:?}", start.elapsed());
 }
