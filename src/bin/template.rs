@@ -4,10 +4,6 @@ fn first(_input: &[&str]) -> u32 {
     unimplemented!()
 }
 
-fn _second(_input: &[&str]) -> u32 {
-    unimplemented!()
-}
-
 fn main() {
     let start = std::time::Instant::now();
 
