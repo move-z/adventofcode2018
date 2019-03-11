@@ -80,11 +80,11 @@ mod test {
 
     #[test]
     fn test1() {
-        assert_eq!(first("dabAcCaCBAcCcaDA"), 10);
+        assert_eq!(10, first("dabAcCaCBAcCcaDA"));
     }
 
     #[test]
     fn test2() {
-        assert_eq!(second("dabAcCaCBAcCcaDA"), 4);
+        assert_eq!(4, second("dabAcCaCBAcCcaDA"));
     }
 }

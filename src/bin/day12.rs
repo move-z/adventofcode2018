@@ -132,6 +132,6 @@ mod test {
         rules.insert("###..", '#');
         rules.insert("###.#", '#');
         rules.insert("####.", '#');
-        assert_eq!(first("#..#.#..##......###...###", &rules), 325);
+        assert_eq!(325, first("#..#.#..##......###...###", &rules));
     }
 }

@@ -129,11 +129,11 @@ mod test {
 
     #[test]
     fn test1() {
-        assert_eq!(first(&data()), 240);
+        assert_eq!(240, first(&data()));
     }
 
     #[test]
     fn test2() {
-        assert_eq!(second(&data()), 4455);
+        assert_eq!(4455, second(&data()));
     }
 }

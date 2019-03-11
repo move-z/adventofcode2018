@@ -133,31 +133,31 @@ mod test {
 
     #[test]
     fn test1_9() {
-        assert_eq!(first(9, 25), 32);
+        assert_eq!(32, first(9, 25));
     }
 
     #[test]
     fn test1_10() {
-        assert_eq!(first(10, 1618), 8317);
+        assert_eq!(8317, first(10, 1618));
     }
 
     #[test]
     fn test1_13() {
-        assert_eq!(first(13, 7999), 146373);
+        assert_eq!(146373, first(13, 7999));
     }
 
     #[test]
     fn test1_17() {
-        assert_eq!(first(17, 1104), 2764);
+        assert_eq!(2764, first(17, 1104));
     }
 
     #[test]
     fn test1_21() {
-        assert_eq!(first(21, 6111), 54718);
+        assert_eq!(54718, first(21, 6111));
     }
 
     #[test]
     fn test1_30() {
-        assert_eq!(first(30, 5807), 37305);
+        assert_eq!(37305, first(30, 5807));
     }
 }

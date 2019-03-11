@@ -95,56 +95,56 @@ mod test {
 
     #[test]
     fn abcdef() {
-        assert_eq!(count("abcdef"), (false, false));
+        assert_eq!((false, false), count("abcdef"));
     }
 
     #[test]
     fn bababc() {
-        assert_eq!(count("bababc"), (true, true));
+        assert_eq!((true, true), count("bababc"));
     }
 
     #[test]
     fn abbcde() {
-        assert_eq!(count("abbcde"), (true, false));
+        assert_eq!((true, false), count("abbcde"));
     }
 
     #[test]
     fn abcccd() {
-        assert_eq!(count("abcccd"), (false, true));
+        assert_eq!((false, true), count("abcccd"));
     }
 
     #[test]
     fn aabcdd() {
-        assert_eq!(count("aabcdd"), (true, false));
+        assert_eq!((true, false), count("aabcdd"));
     }
 
     #[test]
     fn abcdee() {
-        assert_eq!(count("abcdee"), (true, false));
+        assert_eq!((true, false), count("abcdee"));
     }
 
     #[test]
     fn ababab() {
-        assert_eq!(count("ababab"), (false, true));
+        assert_eq!((false, true), count("ababab"));
     }
 
     #[test]
     fn test() {
         assert_eq!(
+            12,
             first(&vec![
                 "abcdef", "bababc", "abbcde", "abcccd", "aabcdd", "abcdee", "ababab"
-            ]),
-            12
+            ])
         );
     }
 
     #[test]
     fn test2() {
         assert_eq!(
+            "fgij",
             second(&vec![
                 "abcde", "fghij", "klmno", "pqrst", "fguij", "axcye", "wvxyz"
-            ]),
-            "fgij"
+            ])
         )
     }
 }

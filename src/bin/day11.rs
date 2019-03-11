@@ -100,42 +100,42 @@ mod test {
 
     #[test]
     fn test_3_5_8() {
-        assert_eq!(power(3, 5, 8), 4);
+        assert_eq!(4, power(3, 5, 8));
     }
 
     #[test]
     fn test_122_79_57() {
-        assert_eq!(power(122, 79, 57), -5);
+        assert_eq!(-5, power(122, 79, 57));
     }
 
     #[test]
     fn test_217_196_39() {
-        assert_eq!(power(217, 196, 39), 0);
+        assert_eq!(0, power(217, 196, 39));
     }
 
     #[test]
     fn test() {
         let cells = build_cells(18);
-        assert_eq!(grid_power(&cells, 33, 45, 3), 29);
+        assert_eq!(29, grid_power(&cells, 33, 45, 3));
     }
 
     #[test]
     fn test1_18() {
-        assert_eq!(first(18), (33, 45));
+        assert_eq!((33, 45), first(18));
     }
 
     #[test]
     fn test1_42() {
-        assert_eq!(first(42), (21, 61));
+        assert_eq!((21, 61), first(42));
     }
 
     #[test]
     fn test2_18() {
-        assert_eq!(second(18), (90, 269, 16));
+        assert_eq!((90, 269, 16), second(18));
     }
 
     #[test]
     fn test2_42() {
-        assert_eq!(second(42), (232, 251, 12));
+        assert_eq!((232, 251, 12), second(42));
     }
 }

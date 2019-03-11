@@ -65,39 +65,39 @@ mod test {
 
     #[test]
     fn test9() {
-        assert_eq!(first(9), "5158916779");
+        assert_eq!("5158916779", first(9));
     }
 
     #[test]
     fn test5() {
-        assert_eq!(first(5), "0124515891");
+        assert_eq!("0124515891", first(5));
     }
 
     #[test]
     fn test18() {
-        assert_eq!(first(18), "9251071085");
+        assert_eq!("9251071085", first(18));
     }
 
     #[test]
     fn test2018() {
-        assert_eq!(first(2018), "5941429882");
+        assert_eq!("5941429882", first(2018));
     }
 
     #[test]
     fn test51589() {
-        assert_eq!(second("51589"), 9);
+        assert_eq!(9, second("51589"));
     }
 
     #[test]
     fn test01245() {
-        assert_eq!(second("01245"), 5);
+        assert_eq!(5, second("01245"));
     }
     #[test]
     fn test92510() {
-        assert_eq!(second("92510"), 18);
+        assert_eq!(18, second("92510"));
     }
     #[test]
     fn test59414() {
-        assert_eq!(second("59414"), 2018);
+        assert_eq!(2018, second("59414"));
     }
 }

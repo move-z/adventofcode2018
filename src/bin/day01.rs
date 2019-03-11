@@ -49,46 +49,46 @@ mod test {
 
     #[test]
     fn test1() {
-        assert_eq!(first(&vec!["+1", "-2", "+3", "+1"]), 3);
+        assert_eq!(3, first(&vec!["+1", "-2", "+3", "+1"]));
     }
 
     #[test]
     fn test11() {
-        assert_eq!(first(&vec!["+1", "+1", "+1"]), 3);
+        assert_eq!(3, first(&vec!["+1", "+1", "+1"]));
     }
 
     #[test]
     fn test12() {
-        assert_eq!(first(&vec!["+1", "+1", "-2"]), 0);
+        assert_eq!(0, first(&vec!["+1", "+1", "-2"]));
     }
 
     #[test]
     fn test13() {
-        assert_eq!(first(&vec!["-1", "-2", "-3"]), -6);
+        assert_eq!(-6, first(&vec!["-1", "-2", "-3"]));
     }
 
     #[test]
     fn test2() {
-        assert_eq!(second(&vec!["+1", "-2", "+3", "+1"]), 2);
+        assert_eq!(2, second(&vec!["+1", "-2", "+3", "+1"]));
     }
 
     #[test]
     fn test21() {
-        assert_eq!(second(&vec!["+1", "-1"]), 0);
+        assert_eq!(0, second(&vec!["+1", "-1"]));
     }
 
     #[test]
     fn test22() {
-        assert_eq!(second(&vec!["+3", "+3", "+4", "-2", "-4"]), 10);
+        assert_eq!(10, second(&vec!["+3", "+3", "+4", "-2", "-4"]));
     }
 
     #[test]
     fn test23() {
-        assert_eq!(second(&vec!["-6", "+3", "+8", "+5", "-6"]), 5);
+        assert_eq!(5, second(&vec!["-6", "+3", "+8", "+5", "-6"]));
     }
 
     #[test]
     fn test24() {
-        assert_eq!(second(&vec!["+7", "+7", "-2", "-7", "-4"]), 14);
+        assert_eq!(14, second(&vec!["+7", "+7", "-2", "-7", "-4"]));
     }
 }
