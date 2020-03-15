@@ -109,10 +109,10 @@ mod test {
 
     #[test]
     fn test1() {
-        assert_eq!(first(
+        assert_eq!(
             4,
-            &vec!["#1 @ 1,3: 4x4", "#2 @ 3,1: 4x4", "#3 @ 5,5: 2x2"]
-        ));
+            first(&vec!["#1 @ 1,3: 4x4", "#2 @ 3,1: 4x4", "#3 @ 5,5: 2x2"])
+        );
     }
 
     #[test]
