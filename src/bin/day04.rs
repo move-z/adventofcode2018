@@ -30,7 +30,7 @@ type Minute = u8;
 
 fn parse(input: &[&str]) -> HashMap<Id, HashMap<Minute, u32>> {
     let mut input = input.to_vec();
-    input.sort();
+    input.sort_unstable();
 
     let mut r: HashMap<Id, HashMap<Minute, u32>> = HashMap::new();
 

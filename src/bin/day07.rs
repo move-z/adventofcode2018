@@ -85,7 +85,7 @@ fn next(input: &mut HashMap<char, HashSet<char>>) -> Vec<char> {
         .filter(|(_, tos)| tos.is_empty())
         .map(|(from, _)| *from)
         .collect::<Vec<char>>();
-    free.sort();
+    free.sort_unstable();
     free
 }
 

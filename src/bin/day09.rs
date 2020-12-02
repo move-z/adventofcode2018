@@ -7,11 +7,7 @@ use lazy_static::lazy_static;
 use regex::Regex;
 
 fn first(player_num: usize, max_value: usize) -> usize {
-    let mut players = Vec::with_capacity(player_num);
-    for _ in 0..player_num {
-        players.push(0);
-    }
-
+    let mut players = vec!(0, player_num);
     let mut board = List::new(0);
 
     for cur in 1..=max_value {
@@ -82,7 +78,7 @@ impl List {
         let prev = head.borrow().prev.clone().unwrap();
         next.borrow_mut().prev = Some(prev.clone());
         prev.borrow_mut().next = Some(next.clone());
-        self.head = next.clone();
+        self.head = next;
 
         let h = head.borrow();
         h.value
