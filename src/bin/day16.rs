@@ -1,5 +1,7 @@
 use adventofcode2018::*;
 
+use std::collections::{HashMap, HashSet};
+use std::iter::FromIterator;
 use regex::Regex;
 
 use lazy_static::lazy_static;
@@ -7,6 +9,58 @@ use lazy_static::lazy_static;
 fn first(input: &[&str]) -> usize {
     let (samples, _) = parse_file(input);
     samples.iter().filter(|s| s.opcodes().len() >= 3).count()
+}
+
+fn second(input: &[&str]) -> i32 {
+    let (samples, ops) = parse_file(input);
+
+    let mut ops_by_code: HashMap<i32, HashSet<OpCode>> = HashMap::new();
+    for sample in samples.iter() {
+        let opcode = sample.op.0;
+        // println!("SCANNING OPCODE {}", opcode);
+        let valid_ops = HashSet::from_iter(sample.opcodes());
+        let ops_candidates = ops_by_code.get(&opcode);
+        if let Some(ops_candidates) = ops_candidates {
+            // println!("CURRENT CANDIDATES: {:?}", ops_candidates);
+            // println!("INTERSECT TO: {:?}", valid_ops);
+            let remain: HashSet<OpCode> = ops_candidates.intersection(&valid_ops).cloned().collect();
+            // println!("CANDIDATES: {:?}", remain);
+            ops_by_code.insert(opcode, remain);
+        } else {
+            // println!("CANDIDATES: {:?}", valid_ops);
+            ops_by_code.insert(opcode, valid_ops);
+        }
+    }
+
+    loop {
+        let mut found = false;
+        for (sure_numcode, sure_opcode) in ops_by_code.clone().iter().filter(|(_, c)| c.len() == 1) {
+            let sure_opcode = sure_opcode.iter().next().unwrap();
+            for (numcode, opcodes) in ops_by_code.iter_mut() {
+                if numcode != sure_numcode {
+                    found |= opcodes.remove(sure_opcode);
+                }
+            }
+        }
+        if !found {
+            break;
+        }
+    }
+
+    let mut op_by_code = [OpCode::Nop; 16];
+    for code in 0..16 {
+        if let Some(ops) = ops_by_code.get(&code) {
+            assert_eq!(ops.len(), 1);
+            op_by_code[code as usize] = *ops.iter().next().unwrap();
+        }
+    }
+
+    let mut regs = Registers::new(0, 0, 0, 0);
+    for op in ops {
+        let op = parse_op(op, &op_by_code);
+        regs = op.apply(&regs);
+    }
+    regs.inner.0
 }
 
 fn parse_file<'a>(input: &[&'a str]) -> (Vec<Sample>, Vec<&'a str>) {
@@ -25,11 +79,11 @@ fn parse_file<'a>(input: &[&'a str]) -> (Vec<Sample>, Vec<&'a str>) {
                 samples.push(sample);
             }
             before = "";
-        } else if line.len() > 0 {
-            if before.len() > 0 {
+        } else if !line.is_empty() {
+            if !before.is_empty() {
                 op = line;
             } else {
-                ops.push(op);
+                ops.push(line);
             }
         }
     }
@@ -47,6 +101,12 @@ lazy_static! {
 }
 
 impl Registers {
+    fn new(a: i32, b: i32, c: i32, d: i32) -> Registers {
+        Registers {
+            inner: (a, b, c, d)
+        }
+    }
+
     fn parse(input: &str) -> Option<Registers> {
         if let Some(cap) = REGISTERS_RE.captures(input) {
             let a = parse_capture(&cap, 1, "a").unwrap();
@@ -82,7 +142,7 @@ impl Registers {
     }
 }
 
-#[derive(Eq, PartialEq, Hash, Clone, Copy)]
+#[derive(Eq, PartialEq, Hash, Clone, Copy, Debug)]
 enum OpCode {
     AddR(i32, i32, i32),
     AddI(i32, i32, i32),
@@ -94,12 +154,13 @@ enum OpCode {
     BorI(i32, i32, i32),
     SetR(i32, i32, i32),
     SetI(i32, i32, i32),
-    GtiIR(i32, i32, i32),
-    GtiRI(i32, i32, i32),
-    GtiRR(i32, i32, i32),
+    GtIR(i32, i32, i32),
+    GtRI(i32, i32, i32),
+    GtRR(i32, i32, i32),
     EqIR(i32, i32, i32),
     EqRI(i32, i32, i32),
     EqRR(i32, i32, i32),
+    Nop,
 }
 
 impl OpCode {
@@ -121,20 +182,39 @@ impl OpCode {
             OpCode::SetR(a, _, c) => res.set(c, res.get(a)),
             OpCode::SetI(a, _, c) => res.set(c, *a),
 
-            OpCode::GtiIR(a, b, c) => res.set(c, if *a > res.get(b) { 1 } else { 0 }),
-            OpCode::GtiRI(a, b, c) => res.set(c, if res.get(a) > *b { 1 } else { 0 }),
-            OpCode::GtiRR(a, b, c) => res.set(c, if res.get(a) > res.get(b) { 1 } else { 0 }),
+            OpCode::GtIR(a, b, c) => res.set(c, if *a > res.get(b) { 1 } else { 0 }),
+            OpCode::GtRI(a, b, c) => res.set(c, if res.get(a) > *b { 1 } else { 0 }),
+            OpCode::GtRR(a, b, c) => res.set(c, if res.get(a) > res.get(b) { 1 } else { 0 }),
 
             OpCode::EqIR(a, b, c) => res.set(c, if *a == res.get(b) { 1 } else { 0 }),
             OpCode::EqRI(a, b, c) => res.set(c, if res.get(a) == *b { 1 } else { 0 }),
             OpCode::EqRR(a, b, c) => res.set(c, if res.get(a) == res.get(b) { 1 } else { 0 }),
+            _ => {},
         }
 
         res
     }
 
-    fn test(&self, before: &Registers, after: &Registers) -> bool {
-        self.apply(before) == *after
+    fn to_default(&self) -> OpCode {
+        match self {
+            OpCode::AddR(_, _, _) => OpCode::AddR(0, 0, 0),
+            OpCode::AddI(_, _, _) => OpCode::AddI(0, 0, 0),
+            OpCode::MulR(_, _, _) => OpCode::MulR(0, 0, 0),
+            OpCode::MulI(_, _, _) => OpCode::MulI(0, 0, 0),
+            OpCode::BanR(_, _, _) => OpCode::BanR(0, 0, 0),
+            OpCode::BanI(_, _, _) => OpCode::BanI(0, 0, 0),
+            OpCode::BorR(_, _, _) => OpCode::BorR(0, 0, 0),
+            OpCode::BorI(_, _, _) => OpCode::BorI(0, 0, 0),
+            OpCode::SetR(_, _, _) => OpCode::SetR(0, 0, 0),
+            OpCode::SetI(_, _, _) => OpCode::SetI(0, 0, 0),
+            OpCode::GtIR(_, _, _) => OpCode::GtIR(0, 0, 0),
+            OpCode::GtRI(_, _, _) => OpCode::GtRI(0, 0, 0),
+            OpCode::GtRR(_, _, _) => OpCode::GtRR(0, 0, 0),
+            OpCode::EqIR(_, _, _) => OpCode::EqIR(0, 0, 0),
+            OpCode::EqRI(_, _, _) => OpCode::EqRI(0, 0, 0),
+            OpCode::EqRR(_, _, _) => OpCode::EqRR(0, 0, 0),
+            _ => *self,
+        }
     }
 }
 
@@ -170,8 +250,8 @@ impl Sample {
     fn opcodes(&self) -> Vec<OpCode> {
         let mut res = Vec::new();
         let mut t = |o: OpCode| {
-            if o.test(&self.before, &self.after) {
-                res.push(o);
+            if o.apply(&self.before) == self.after {
+                res.push(o.to_default());
             }
         };
         t(OpCode::AddR(self.op.1, self.op.2, self.op.3));
@@ -184,14 +264,44 @@ impl Sample {
         t(OpCode::BorI(self.op.1, self.op.2, self.op.3));
         t(OpCode::SetR(self.op.1, self.op.2, self.op.3));
         t(OpCode::SetI(self.op.1, self.op.2, self.op.3));
-        t(OpCode::GtiIR(self.op.1, self.op.2, self.op.3));
-        t(OpCode::GtiRI(self.op.1, self.op.2, self.op.3));
-        t(OpCode::GtiRR(self.op.1, self.op.2, self.op.3));
+        t(OpCode::GtIR(self.op.1, self.op.2, self.op.3));
+        t(OpCode::GtRI(self.op.1, self.op.2, self.op.3));
+        t(OpCode::GtRR(self.op.1, self.op.2, self.op.3));
         t(OpCode::EqIR(self.op.1, self.op.2, self.op.3));
         t(OpCode::EqRI(self.op.1, self.op.2, self.op.3));
         t(OpCode::EqRR(self.op.1, self.op.2, self.op.3));
 
         res
+    }
+}
+
+fn parse_op(input: &str, codemap: &[OpCode; 16]) -> OpCode {
+    if let Some(cap) = OP_RE.captures(input) {
+        let o: usize = parse_capture(&cap, 1, "o").unwrap();
+        let a = parse_capture(&cap, 2, "a").unwrap();
+        let b = parse_capture(&cap, 3, "b").unwrap();
+        let c = parse_capture(&cap, 4, "c").unwrap();
+        match codemap[o] {
+            OpCode::AddR(_, _, _) => OpCode::AddR(a, b, c),
+            OpCode::AddI(_, _, _) => OpCode::AddI(a, b, c),
+            OpCode::MulR(_, _, _) => OpCode::MulR(a, b, c),
+            OpCode::MulI(_, _, _) => OpCode::MulI(a, b, c),
+            OpCode::BanR(_, _, _) => OpCode::BanR(a, b, c),
+            OpCode::BanI(_, _, _) => OpCode::BanI(a, b, c),
+            OpCode::BorR(_, _, _) => OpCode::BorR(a, b, c),
+            OpCode::BorI(_, _, _) => OpCode::BorI(a, b, c),
+            OpCode::SetR(_, _, _) => OpCode::SetR(a, b, c),
+            OpCode::SetI(_, _, _) => OpCode::SetI(a, b, c),
+            OpCode::GtIR(_, _, _) => OpCode::GtIR(a, b, c),
+            OpCode::GtRI(_, _, _) => OpCode::GtRI(a, b, c),
+            OpCode::GtRR(_, _, _) => OpCode::GtRR(a, b, c),
+            OpCode::EqIR(_, _, _) => OpCode::EqIR(a, b, c),
+            OpCode::EqRI(_, _, _) => OpCode::EqRI(a, b, c),
+            OpCode::EqRR(_, _, _) => OpCode::EqRR(a, b, c),
+            OpCode::Nop => OpCode::Nop,
+        }
+    } else {
+        OpCode::Nop
     }
 }
 
@@ -202,6 +312,7 @@ fn main() {
     let input: Vec<&str> = input.trim().split('\n').collect();
 
     println!("{}", first(&input));
+    println!("{}", second(&input));
 
     println!("elapsed {:?}", start.elapsed());
 }
