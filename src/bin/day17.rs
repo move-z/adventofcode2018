@@ -94,7 +94,7 @@ impl Board {
 
     fn get_tile(&self, pos: &Coord) -> Tile {
         match self.board.get(pos) {
-            Some(t) => t.clone(),
+            Some(t) => *t,
             _ => Tile::Sand,
         }
     }
