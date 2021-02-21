@@ -1,4 +1,5 @@
 use adventofcode2018::*;
+use std::collections::HashMap;
 
 fn first(input: &[&str]) -> usize {
     let mut area = CollectionArea::parse(input).unwrap();
@@ -8,11 +9,38 @@ fn first(input: &[&str]) -> usize {
     area.resource_value()
 }
 
-fn second(_input: &[&str]) -> usize {
-    unimplemented!()
+fn second(input: &[&str]) -> usize {
+    const ITERATIONS: usize = 1_000_000_000;
+    let mut area = CollectionArea::parse(input).unwrap();
+
+    let mut cache = HashMap::new();
+    let mut res_cache = Vec::new();
+    let mut idx = 0;
+    loop {
+        if idx == ITERATIONS {
+            return area.resource_value();
+        }
+
+        if cache.contains_key(&area) {
+            break;
+        }
+
+        let val = area.resource_value();
+        res_cache.push(val);
+        cache.insert(area.clone(), idx);
+
+        idx += 1;
+        area = area.next();
+    }
+
+    let loop_start = cache.get(&area).unwrap();
+    let loop_size = idx - loop_start;
+    let remainder = (ITERATIONS - loop_start) % loop_size;
+
+    res_cache[loop_start + remainder]
 }
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
 enum Acre {
     OpenGround,
     Trees,
@@ -57,6 +85,7 @@ impl Acre {
     }
 }
 
+#[derive(Clone, Eq, PartialEq, Hash)]
 struct CollectionArea {
     inner: Vec<Vec<Acre>>,
 }
