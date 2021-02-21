@@ -1,18 +1,24 @@
 use adventofcode2018::*;
 
 fn first(input: &str) -> u32 {
-    strip(input.to_string()).len() as u32
+    strip(input.chars().map(|c| c as u8).collect()).len() as u32
 }
 
 fn second(input: &str) -> u32 {
-    let stripped = strip(input.to_string());
+    let stripped = strip(input.chars().map(|c| c as u8).collect());
 
     let subst = (b'a'..=b'z')
         .map(|c| {
-            let cl = c as char;
-            let cu = cl.to_uppercase().next().unwrap();
-
-            stripped.to_string().replace(cl, "").replace(cu, "")
+            stripped
+                .iter()
+                .filter_map(|&ch| {
+                    if ch != c && ch != (c as char).to_uppercase().next().unwrap() as u8 {
+                        Some(ch)
+                    } else {
+                        None
+                    }
+                })
+                .collect()
         })
         .filter(|s| s != &stripped)
         .map(|s| strip(s).len())
@@ -22,25 +28,26 @@ fn second(input: &str) -> u32 {
     subst as u32
 }
 
-fn strip(input: String) -> String {
-    fn react(a: char, b: char) -> bool {
-        a != b && (a.to_lowercase().next().unwrap() == b || b.to_lowercase().next().unwrap() == a)
+fn strip(input: Vec<u8>) -> Vec<u8> {
+    fn react(a: u8, b: u8) -> bool {
+        // a != b && (a.to_lowercase().next().unwrap() == b || b.to_lowercase().next().unwrap() == a)
+        a != b && (a as i8 - b as i8).abs() == 32
     }
 
-    let mut chars = input.chars().collect::<Vec<char>>();
+    let mut res = input;
     loop {
         let mut changed = false;
         let mut last_deleted = None;
 
-        chars = chars
+        res = res
             .iter()
             .enumerate()
             .filter(|(i, &c)| {
                 let i = *i;
 
-                let remove = if i > 0 && last_deleted != Some(i - 1) && react(c, chars[i - 1]) {
+                let remove = if i > 0 && last_deleted != Some(i - 1) && react(c, res[i - 1]) {
                     true
-                } else if i < chars.len() - 1 && react(c, chars[i + 1]) {
+                } else if i < res.len() - 1 && react(c, res[i + 1]) {
                     last_deleted = Some(i + 1);
                     true
                 } else {
@@ -58,7 +65,7 @@ fn strip(input: String) -> String {
         }
     }
 
-    chars.iter().collect()
+    res
 }
 
 fn main() {
