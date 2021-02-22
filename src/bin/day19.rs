@@ -240,31 +240,30 @@ seti 9 0 5"
             .split("\n")
             .collect();
 
-        let mut run;
         let mut machine = Machine::parse(&input);
         assert_eq!(machine.registers.inner, (0, 0, 0, 0, 0, 0));
 
-        run = machine.execute_step();
+        machine.execute_step();
         assert_eq!(machine.state, MachineState::Active);
         assert_eq!(machine.registers.inner, (1, 5, 0, 0, 0, 0));
 
-        run = machine.execute_step();
+        machine.execute_step();
         assert_eq!(machine.state, MachineState::Active);
         assert_eq!(machine.registers.inner, (2, 5, 6, 0, 0, 0));
 
-        run = machine.execute_step();
+        machine.execute_step();
         assert_eq!(machine.state, MachineState::Active);
         assert_eq!(machine.registers.inner, (4, 5, 6, 0, 0, 0));
 
-        run = machine.execute_step();
+        machine.execute_step();
         assert_eq!(machine.state, MachineState::Active);
         assert_eq!(machine.registers.inner, (6, 5, 6, 0, 0, 0));
 
-        run = machine.execute_step();
+        machine.execute_step();
         assert_eq!(machine.state, MachineState::Active);
         assert_eq!(machine.registers.inner, (7, 5, 6, 0, 0, 9));
 
-        run = machine.execute_step();
+        machine.execute_step();
         assert_eq!(machine.state, MachineState::Halted);
     }
 }
