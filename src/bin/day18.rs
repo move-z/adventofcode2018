@@ -191,7 +191,7 @@ mod test {
     }
 
     #[test]
-    fn test1() {
+    fn test() {
         let area = CollectionArea::parse(&INITIAL_STATE).unwrap();
 
         let area = area.next();
