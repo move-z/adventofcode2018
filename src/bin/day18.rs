@@ -130,9 +130,9 @@ impl CollectionArea {
             let line = &self.inner[curr_row];
             let minc = if col > 0 { col - 1 } else { col };
             let maxc = if col < line.len() - 1 { col + 1 } else { col };
-            for curr_col in minc..=maxc {
+            for (curr_col, acre) in line.iter().enumerate().skip(minc).take(maxc) {
                 if curr_row != row || curr_col != col {
-                    res.push(&line[curr_col]);
+                    res.push(acre);
                 }
             }
         }
@@ -153,7 +153,7 @@ impl CollectionArea {
     }
 
     fn iter(&self) -> Box<dyn Iterator<Item = Acre> + '_> {
-        Box::new(self.inner.iter().flatten().map(|a| *a))
+        Box::new(self.inner.iter().flatten().copied())
     }
 }
 

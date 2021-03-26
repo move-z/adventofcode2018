@@ -154,12 +154,12 @@ enum OpCode {
     BorI(i32, i32, i32),
     SetR(i32, i32, i32),
     SetI(i32, i32, i32),
-    GtIR(i32, i32, i32),
-    GtRI(i32, i32, i32),
-    GtRR(i32, i32, i32),
-    EqIR(i32, i32, i32),
-    EqRI(i32, i32, i32),
-    EqRR(i32, i32, i32),
+    GtIr(i32, i32, i32),
+    GtRi(i32, i32, i32),
+    GtRr(i32, i32, i32),
+    EqIr(i32, i32, i32),
+    EqRi(i32, i32, i32),
+    EqRr(i32, i32, i32),
     Nop,
 }
 
@@ -182,13 +182,13 @@ impl OpCode {
             OpCode::SetR(a, _, c) => res.set(c, res.get(a)),
             OpCode::SetI(a, _, c) => res.set(c, *a),
 
-            OpCode::GtIR(a, b, c) => res.set(c, if *a > res.get(b) { 1 } else { 0 }),
-            OpCode::GtRI(a, b, c) => res.set(c, if res.get(a) > *b { 1 } else { 0 }),
-            OpCode::GtRR(a, b, c) => res.set(c, if res.get(a) > res.get(b) { 1 } else { 0 }),
+            OpCode::GtIr(a, b, c) => res.set(c, if *a > res.get(b) { 1 } else { 0 }),
+            OpCode::GtRi(a, b, c) => res.set(c, if res.get(a) > *b { 1 } else { 0 }),
+            OpCode::GtRr(a, b, c) => res.set(c, if res.get(a) > res.get(b) { 1 } else { 0 }),
 
-            OpCode::EqIR(a, b, c) => res.set(c, if *a == res.get(b) { 1 } else { 0 }),
-            OpCode::EqRI(a, b, c) => res.set(c, if res.get(a) == *b { 1 } else { 0 }),
-            OpCode::EqRR(a, b, c) => res.set(c, if res.get(a) == res.get(b) { 1 } else { 0 }),
+            OpCode::EqIr(a, b, c) => res.set(c, if *a == res.get(b) { 1 } else { 0 }),
+            OpCode::EqRi(a, b, c) => res.set(c, if res.get(a) == *b { 1 } else { 0 }),
+            OpCode::EqRr(a, b, c) => res.set(c, if res.get(a) == res.get(b) { 1 } else { 0 }),
             _ => {},
         }
 
@@ -207,12 +207,12 @@ impl OpCode {
             OpCode::BorI(_, _, _) => OpCode::BorI(0, 0, 0),
             OpCode::SetR(_, _, _) => OpCode::SetR(0, 0, 0),
             OpCode::SetI(_, _, _) => OpCode::SetI(0, 0, 0),
-            OpCode::GtIR(_, _, _) => OpCode::GtIR(0, 0, 0),
-            OpCode::GtRI(_, _, _) => OpCode::GtRI(0, 0, 0),
-            OpCode::GtRR(_, _, _) => OpCode::GtRR(0, 0, 0),
-            OpCode::EqIR(_, _, _) => OpCode::EqIR(0, 0, 0),
-            OpCode::EqRI(_, _, _) => OpCode::EqRI(0, 0, 0),
-            OpCode::EqRR(_, _, _) => OpCode::EqRR(0, 0, 0),
+            OpCode::GtIr(_, _, _) => OpCode::GtIr(0, 0, 0),
+            OpCode::GtRi(_, _, _) => OpCode::GtRi(0, 0, 0),
+            OpCode::GtRr(_, _, _) => OpCode::GtRr(0, 0, 0),
+            OpCode::EqIr(_, _, _) => OpCode::EqIr(0, 0, 0),
+            OpCode::EqRi(_, _, _) => OpCode::EqRi(0, 0, 0),
+            OpCode::EqRr(_, _, _) => OpCode::EqRr(0, 0, 0),
             _ => *self,
         }
     }
@@ -264,12 +264,12 @@ impl Sample {
         t(OpCode::BorI(self.op.1, self.op.2, self.op.3));
         t(OpCode::SetR(self.op.1, self.op.2, self.op.3));
         t(OpCode::SetI(self.op.1, self.op.2, self.op.3));
-        t(OpCode::GtIR(self.op.1, self.op.2, self.op.3));
-        t(OpCode::GtRI(self.op.1, self.op.2, self.op.3));
-        t(OpCode::GtRR(self.op.1, self.op.2, self.op.3));
-        t(OpCode::EqIR(self.op.1, self.op.2, self.op.3));
-        t(OpCode::EqRI(self.op.1, self.op.2, self.op.3));
-        t(OpCode::EqRR(self.op.1, self.op.2, self.op.3));
+        t(OpCode::GtIr(self.op.1, self.op.2, self.op.3));
+        t(OpCode::GtRi(self.op.1, self.op.2, self.op.3));
+        t(OpCode::GtRr(self.op.1, self.op.2, self.op.3));
+        t(OpCode::EqIr(self.op.1, self.op.2, self.op.3));
+        t(OpCode::EqRi(self.op.1, self.op.2, self.op.3));
+        t(OpCode::EqRr(self.op.1, self.op.2, self.op.3));
 
         res
     }
@@ -292,12 +292,12 @@ fn parse_op(input: &str, codemap: &[OpCode; 16]) -> OpCode {
             OpCode::BorI(_, _, _) => OpCode::BorI(a, b, c),
             OpCode::SetR(_, _, _) => OpCode::SetR(a, b, c),
             OpCode::SetI(_, _, _) => OpCode::SetI(a, b, c),
-            OpCode::GtIR(_, _, _) => OpCode::GtIR(a, b, c),
-            OpCode::GtRI(_, _, _) => OpCode::GtRI(a, b, c),
-            OpCode::GtRR(_, _, _) => OpCode::GtRR(a, b, c),
-            OpCode::EqIR(_, _, _) => OpCode::EqIR(a, b, c),
-            OpCode::EqRI(_, _, _) => OpCode::EqRI(a, b, c),
-            OpCode::EqRR(_, _, _) => OpCode::EqRR(a, b, c),
+            OpCode::GtIr(_, _, _) => OpCode::GtIr(a, b, c),
+            OpCode::GtRi(_, _, _) => OpCode::GtRi(a, b, c),
+            OpCode::GtRr(_, _, _) => OpCode::GtRr(a, b, c),
+            OpCode::EqIr(_, _, _) => OpCode::EqIr(a, b, c),
+            OpCode::EqRi(_, _, _) => OpCode::EqRi(a, b, c),
+            OpCode::EqRr(_, _, _) => OpCode::EqRr(a, b, c),
             OpCode::Nop => OpCode::Nop,
         }
     } else {

@@ -48,9 +48,7 @@ impl Registers {
     }
 
     fn set(&self, i: &i32, val: i32) -> Self {
-        let mut res = Registers {
-            inner: self.inner.clone(),
-        };
+        let mut res = Registers { inner: self.inner };
         match i {
             0 => res.inner.0 = val,
             1 => res.inner.1 = val,
@@ -75,12 +73,12 @@ enum OpCode {
     BorI(i32, i32, i32),
     SetR(i32, i32, i32),
     SetI(i32, i32, i32),
-    GtIR(i32, i32, i32),
-    GtRI(i32, i32, i32),
-    GtRR(i32, i32, i32),
-    EqIR(i32, i32, i32),
-    EqRI(i32, i32, i32),
-    EqRR(i32, i32, i32),
+    GtIr(i32, i32, i32),
+    GtRi(i32, i32, i32),
+    GtRr(i32, i32, i32),
+    EqIr(i32, i32, i32),
+    EqRi(i32, i32, i32),
+    EqRr(i32, i32, i32),
     Nop,
 }
 
@@ -106,13 +104,13 @@ impl OpCode {
             OpCode::SetR(a, _, c) => input.set(c, input.get(a)),
             OpCode::SetI(a, _, c) => input.set(c, *a),
 
-            OpCode::GtIR(a, b, c) => input.set(c, if *a > input.get(b) { 1 } else { 0 }),
-            OpCode::GtRI(a, b, c) => input.set(c, if input.get(a) > *b { 1 } else { 0 }),
-            OpCode::GtRR(a, b, c) => input.set(c, if input.get(a) > input.get(b) { 1 } else { 0 }),
+            OpCode::GtIr(a, b, c) => input.set(c, if *a > input.get(b) { 1 } else { 0 }),
+            OpCode::GtRi(a, b, c) => input.set(c, if input.get(a) > *b { 1 } else { 0 }),
+            OpCode::GtRr(a, b, c) => input.set(c, if input.get(a) > input.get(b) { 1 } else { 0 }),
 
-            OpCode::EqIR(a, b, c) => input.set(c, if *a == input.get(b) { 1 } else { 0 }),
-            OpCode::EqRI(a, b, c) => input.set(c, if input.get(a) == *b { 1 } else { 0 }),
-            OpCode::EqRR(a, b, c) => input.set(c, if input.get(a) == input.get(b) { 1 } else { 0 }),
+            OpCode::EqIr(a, b, c) => input.set(c, if *a == input.get(b) { 1 } else { 0 }),
+            OpCode::EqRi(a, b, c) => input.set(c, if input.get(a) == *b { 1 } else { 0 }),
+            OpCode::EqRr(a, b, c) => input.set(c, if input.get(a) == input.get(b) { 1 } else { 0 }),
 
             _ => input.clone(),
         }
@@ -136,12 +134,12 @@ impl OpCode {
                 "bori" => OpCode::BorI(a, b, c),
                 "setr" => OpCode::SetR(a, b, c),
                 "seti" => OpCode::SetI(a, b, c),
-                "gtir" => OpCode::GtIR(a, b, c),
-                "gtri" => OpCode::GtRI(a, b, c),
-                "gtrr" => OpCode::GtRR(a, b, c),
-                "eqir" => OpCode::EqIR(a, b, c),
-                "eqri" => OpCode::EqRI(a, b, c),
-                "eqrr" => OpCode::EqRR(a, b, c),
+                "gtir" => OpCode::GtIr(a, b, c),
+                "gtri" => OpCode::GtRi(a, b, c),
+                "gtrr" => OpCode::GtRr(a, b, c),
+                "eqir" => OpCode::EqIr(a, b, c),
+                "eqri" => OpCode::EqRi(a, b, c),
+                "eqrr" => OpCode::EqRr(a, b, c),
                 _ => OpCode::Nop,
             };
 

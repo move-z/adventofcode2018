@@ -44,7 +44,7 @@ fn second(input: &[&str]) -> u32 {
             } else {
                 o(bi, bf, ai, af)
             }
-        };
+        }
         o(a.x, a.x + a.w, b.x, b.x + b.w) && o(a.y, a.y + a.h, b.y, b.y + b.h)
     }
 
