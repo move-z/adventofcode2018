@@ -1,8 +1,8 @@
 use adventofcode2018::*;
 
-use std::collections::{HashMap, HashSet};
 use itertools::Itertools;
 use std::cmp::Ordering;
+use std::collections::{HashMap, HashSet};
 
 fn first(input: &[&str]) -> usize {
     let mut board = parse(input);
@@ -16,9 +16,12 @@ fn second(input: &[&str]) -> usize {
     let mut min_success = usize::max_value();
     let mut outcome = 0;
 
-    let count = |board: &Board| board.iter()
-        .filter(|(_, t)| matches!(t, Tile::Npc(Kind::Elf, _, _)))
-        .count();
+    let count = |board: &Board| {
+        board
+            .iter()
+            .filter(|(_, t)| matches!(t, Tile::Npc(Kind::Elf, _, _)))
+            .count()
+    };
     loop {
         let mut board = parse_powerelf(input, power);
         let n_elves = count(&board);
@@ -51,16 +54,37 @@ fn run_game(board: &mut Board) -> usize {
     turn
 }
 
-
-#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Debug)]
 struct Coord {
-    y: isize,
     x: isize,
+    y: isize,
 }
 
 impl Coord {
     fn at(x: isize, y: isize) -> Coord {
         Coord { x, y }
+    }
+}
+
+impl Ord for Coord {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.y > other.y {
+            Ordering::Greater
+        } else if self.y < other.y {
+            Ordering::Less
+        } else if self.x > other.x {
+            Ordering::Greater
+        } else if self.x < other.x {
+            Ordering::Less
+        } else {
+            Ordering::Equal
+        }
+    }
+}
+
+impl PartialOrd for Coord {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
@@ -80,26 +104,24 @@ enum Kind {
 
 type Board = HashMap<Coord, Tile>;
 
-
 fn parse(input: &[&str]) -> Board {
     parse_powerelf(input, 3)
 }
 
 fn parse_powerelf(input: &[&str], elf_power: usize) -> Board {
-    input.iter()
+    input
+        .iter()
         .enumerate()
         .flat_map(|(y, s)| {
-            s.chars()
-                .enumerate()
-                .filter_map(move |(x, c)| {
-                    let pos: Coord = Coord::at(x as isize, y as isize);
-                    match c {
-                        '#' => Some((pos, Tile::Wall)),
-                        'E' => Some((pos, Tile::Npc(Kind::Elf, elf_power, 200))),
-                        'G' => Some((pos, Tile::Npc(Kind::Goblin, 3, 200))),
-                        _ => None,
-                    }
-                })
+            s.chars().enumerate().filter_map(move |(x, c)| {
+                let pos = Coord::at(x as isize, y as isize);
+                match c {
+                    '#' => Some((pos, Tile::Wall)),
+                    'E' => Some((pos, Tile::Npc(Kind::Elf, elf_power, 200))),
+                    'G' => Some((pos, Tile::Npc(Kind::Goblin, 3, 200))),
+                    _ => None,
+                }
+            })
         })
         .collect()
 }
@@ -116,24 +138,29 @@ fn target_path(board: &Board, player_coord: &Coord) -> Option<Path> {
     visited.insert(*player_coord);
 
     loop {
-        let new_paths: Vec<Path> = paths.iter()
+        let new_paths: Vec<Path> = paths
+            .iter()
             .flat_map(|path| {
                 let reachables = get_reachables(board, path.last().unwrap(), &mut visited);
-                reachables.iter().map(|r| {
-                    let mut path = path.clone();
-                    path.push(*r);
-                    path
-                }).collect::<Vec<Path>>()
+                reachables
+                    .iter()
+                    .map(|r| {
+                        let mut path = path.clone();
+                        path.push(*r);
+                        path
+                    })
+                    .collect::<Vec<Path>>()
             })
             .collect();
 
         if new_paths.is_empty() {
-            return None
+            return None;
         }
 
         paths = new_paths;
 
-        let targets: Vec<(&Coord, &Path)> = paths.iter()
+        let targets: Vec<(&Coord, &Path)> = paths
+            .iter()
             .filter_map(|p| {
                 let last = p.last().unwrap();
                 if adjacent(&board, last, &player_kind) {
@@ -161,11 +188,10 @@ fn target_path(board: &Board, player_coord: &Coord) -> Option<Path> {
 }
 
 fn get_kind(board: &Board, player_coord: &Coord) -> Option<Kind> {
-    board.get(player_coord)
-        .and_then(|t| match t {
-            Tile::Npc(k, _, _) => Some(*k),
-            _ => None
-        })
+    board.get(player_coord).and_then(|t| match t {
+        Tile::Npc(k, _, _) => Some(*k),
+        _ => None,
+    })
 }
 
 fn get_reachables(board: &Board, from: &Coord, visited: &mut HashSet<Coord>) -> Vec<Coord> {
@@ -187,9 +213,7 @@ fn get_reachables(board: &Board, from: &Coord, visited: &mut HashSet<Coord>) -> 
 }
 
 fn adjacent(board: &Board, from: &Coord, player_kind: &Kind) -> bool {
-    let is_tgt = |x, y| {
-        is_target(board, &Coord::at(x, y), player_kind)
-    };
+    let is_tgt = |x, y| is_target(board, &Coord::at(x, y), player_kind);
 
     is_tgt(from.x, from.y - 1)
         || is_tgt(from.x - 1, from.y)
@@ -198,10 +222,9 @@ fn adjacent(board: &Board, from: &Coord, player_kind: &Kind) -> bool {
 }
 
 fn is_target(board: &Board, tgt: &Coord, player_kind: &Kind) -> bool {
-    board.get(tgt)
-        .filter(|&t| {
-            matches!(t, Tile::Npc(k, _, _) if *k != *player_kind)
-        })
+    board
+        .get(tgt)
+        .filter(|&t| matches!(t, Tile::Npc(k, _, _) if *k != *player_kind))
         .is_some()
 }
 
@@ -260,7 +283,9 @@ fn get_target(board: &Board, player_coord: &Coord, player_kind: &Kind) -> Option
             }
         })
         .sorted_by(|t1, t2| {
-            if let (Some(Tile::Npc(_, _, hp1)), Some(Tile::Npc(_, _, hp2))) = (board.get(t1), board.get(t2)) {
+            if let (Some(Tile::Npc(_, _, hp1)), Some(Tile::Npc(_, _, hp2))) =
+                (board.get(t1), board.get(t2))
+            {
                 hp1.cmp(&hp2)
             } else {
                 Ordering::Equal
@@ -278,9 +303,14 @@ fn run_turn(board: &mut Board) -> bool {
             continue;
         }
 
-        if board.iter().find(|(_, t)| matches!(t, Tile::Npc(Kind::Elf, _, _))).is_none() ||
-            board.iter().find(|(_, t)| matches!(t, Tile::Npc(Kind::Goblin, _, _))).is_none() {
-            return false
+        if !board
+            .iter()
+            .any(|(_, t)| matches!(t, Tile::Npc(Kind::Elf, _, _)))
+            || !board
+                .iter()
+                .any(|(_, t)| matches!(t, Tile::Npc(Kind::Goblin, _, _)))
+        {
+            return false;
         }
 
         if let Some(pos) = mov(board, player) {
@@ -292,7 +322,8 @@ fn run_turn(board: &mut Board) -> bool {
 }
 
 fn get_players(board: &Board) -> Vec<Coord> {
-    board.iter()
+    board
+        .iter()
         .filter(|(_, t)| matches!(t, Tile::Npc(_, _, _)))
         .map(|(c, _)| *c)
         .sorted()
@@ -300,7 +331,8 @@ fn get_players(board: &Board) -> Vec<Coord> {
 }
 
 fn get_hp(board: &Board, kind: &Kind) -> usize {
-    board.iter()
+    board
+        .iter()
         .map(|(_, t)| match t {
             Tile::Npc(k, _, hp) if k == kind => hp,
             _ => &0usize,
@@ -330,8 +362,10 @@ mod test {
         let board = vec!["#######", "#E..G.#", "#...#.#", "#.G.#G#", "#######"];
         let board = parse(&board);
 
-        assert_eq!(Some(vec![Coord::at(2, 1), Coord::at(3, 1)]),
-                   target_path(&board, &Coord::at(1, 1)));
+        assert_eq!(
+            Some(vec![Coord::at(2, 1), Coord::at(3, 1)]),
+            target_path(&board, &Coord::at(1, 1))
+        );
     }
 
     #[test]
@@ -412,13 +446,7 @@ mod test {
     #[test]
     fn test_turns() {
         let board = vec![
-            "#######",
-            "#.G...#",
-            "#...EG#",
-            "#.#.#G#",
-            "#..G#E#",
-            "#.....#",
-            "#######",
+            "#######", "#.G...#", "#...EG#", "#.#.#G#", "#..G#E#", "#.....#", "#######",
         ];
         let mut board = parse(&board);
 
@@ -469,11 +497,11 @@ mod test {
         assert_eq!(true, run_turn(&mut board));
         assert_eq!(
             vec![
-                    Coord::at(3, 1),
-                    Coord::at(4, 2),
-                    Coord::at(3, 3),
-                    Coord::at(5, 3),
-                    Coord::at(5, 4),
+                Coord::at(3, 1),
+                Coord::at(4, 2),
+                Coord::at(3, 3),
+                Coord::at(5, 3),
+                Coord::at(5, 4),
             ],
             get_players(&board)
         );
@@ -534,20 +562,26 @@ mod test {
             println!("TURN {}", i);
             assert_eq!(true, run_turn(&mut board));
         }
-        assert_eq!(vec![
-            Coord::at(1, 1),
-            Coord::at(2, 2),
-            Coord::at(5, 3),
-            Coord::at(5, 5),
-        ], get_players(&board));
+        assert_eq!(
+            vec![
+                Coord::at(1, 1),
+                Coord::at(2, 2),
+                Coord::at(5, 3),
+                Coord::at(5, 5),
+            ],
+            get_players(&board)
+        );
 
         assert_eq!(false, run_turn(&mut board));
-        assert_eq!(vec![
-            Coord::at(1, 1),
-            Coord::at(2, 2),
-            Coord::at(5, 3),
-            Coord::at(5, 5),
-        ], get_players(&board));
+        assert_eq!(
+            vec![
+                Coord::at(1, 1),
+                Coord::at(2, 2),
+                Coord::at(5, 3),
+                Coord::at(5, 5),
+            ],
+            get_players(&board)
+        );
 
         assert_eq!(590, get_hp(&board, &Kind::Goblin));
     }
@@ -555,13 +589,7 @@ mod test {
     #[test]
     fn test11() {
         let board = vec![
-            "#######",
-            "#G..#E#",
-            "#E#E.E#",
-            "#G.##.#",
-            "#...#E#",
-            "#...E.#",
-            "#######",
+            "#######", "#G..#E#", "#E#E.E#", "#G.##.#", "#...#E#", "#...E.#", "#######",
         ];
         assert_eq!(36334, first(&board))
     }
@@ -569,13 +597,7 @@ mod test {
     #[test]
     fn test12() {
         let board = vec![
-            "#######",
-            "#E..EG#",
-            "#.#G.E#",
-            "#E.##E#",
-            "#G..#.#",
-            "#..E#.#",
-            "#######",
+            "#######", "#E..EG#", "#.#G.E#", "#E.##E#", "#G..#.#", "#..E#.#", "#######",
         ];
         assert_eq!(39514, first(&board))
     }
@@ -583,13 +605,7 @@ mod test {
     #[test]
     fn test13() {
         let board = vec![
-            "#######",
-            "#E.G#.#",
-            "#.#G..#",
-            "#G.#.G#",
-            "#G..#.#",
-            "#...E.#",
-            "#######",
+            "#######", "#E.G#.#", "#.#G..#", "#G.#.G#", "#G..#.#", "#...E.#", "#######",
         ];
         assert_eq!(27755, first(&board))
     }
@@ -597,13 +613,7 @@ mod test {
     #[test]
     fn test14() {
         let board = vec![
-            "#######",
-            "#.E...#",
-            "#.#..G#",
-            "#.###.#",
-            "#E#G#G#",
-            "#...#G#",
-            "#######",
+            "#######", "#.E...#", "#.#..G#", "#.###.#", "#E#G#G#", "#...#G#", "#######",
         ];
         assert_eq!(28944, first(&board))
     }
@@ -627,13 +637,7 @@ mod test {
     #[test]
     fn test21() {
         let board = vec![
-            "#######",
-            "#.G...#",
-            "#...EG#",
-            "#.#.#G#",
-            "#..G#E#",
-            "#.....#",
-            "#######",
+            "#######", "#.G...#", "#...EG#", "#.#.#G#", "#..G#E#", "#.....#", "#######",
         ];
         assert_eq!(4988, second(&board))
     }
@@ -641,13 +645,7 @@ mod test {
     #[test]
     fn test22() {
         let board = vec![
-            "#######",
-            "#E..EG#",
-            "#.#G.E#",
-            "#E.##E#",
-            "#G..#.#",
-            "#..E#.#",
-            "#######",
+            "#######", "#E..EG#", "#.#G.E#", "#E.##E#", "#G..#.#", "#..E#.#", "#######",
         ];
         assert_eq!(31284, second(&board))
     }
@@ -655,13 +653,7 @@ mod test {
     #[test]
     fn test23() {
         let board = vec![
-            "#######",
-            "#E.G#.#",
-            "#.#G..#",
-            "#G.#.G#",
-            "#G..#.#",
-            "#...E.#",
-            "#######",
+            "#######", "#E.G#.#", "#.#G..#", "#G.#.G#", "#G..#.#", "#...E.#", "#######",
         ];
         assert_eq!(3478, second(&board))
     }
@@ -669,13 +661,7 @@ mod test {
     #[test]
     fn test24() {
         let board = vec![
-            "#######",
-            "#.E...#",
-            "#.#..G#",
-            "#.###.#",
-            "#E#G#G#",
-            "#...#G#",
-            "#######",
+            "#######", "#.E...#", "#.#..G#", "#.###.#", "#E#G#G#", "#...#G#", "#######",
         ];
         assert_eq!(6474, second(&board))
     }

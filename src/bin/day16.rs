@@ -1,8 +1,8 @@
 use adventofcode2018::*;
 
+use regex::Regex;
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
-use regex::Regex;
 
 use lazy_static::lazy_static;
 
@@ -23,7 +23,8 @@ fn second(input: &[&str]) -> i32 {
         if let Some(ops_candidates) = ops_candidates {
             // println!("CURRENT CANDIDATES: {:?}", ops_candidates);
             // println!("INTERSECT TO: {:?}", valid_ops);
-            let remain: HashSet<OpCode> = ops_candidates.intersection(&valid_ops).cloned().collect();
+            let remain: HashSet<OpCode> =
+                ops_candidates.intersection(&valid_ops).cloned().collect();
             // println!("CANDIDATES: {:?}", remain);
             ops_by_code.insert(opcode, remain);
         } else {
@@ -34,7 +35,8 @@ fn second(input: &[&str]) -> i32 {
 
     loop {
         let mut found = false;
-        for (sure_numcode, sure_opcode) in ops_by_code.clone().iter().filter(|(_, c)| c.len() == 1) {
+        for (sure_numcode, sure_opcode) in ops_by_code.clone().iter().filter(|(_, c)| c.len() == 1)
+        {
             let sure_opcode = sure_opcode.iter().next().unwrap();
             for (numcode, opcodes) in ops_by_code.iter_mut() {
                 if numcode != sure_numcode {
@@ -68,7 +70,7 @@ fn parse_file<'a>(input: &[&'a str]) -> (Vec<Sample>, Vec<&'a str>) {
     let mut ops = Vec::new();
 
     let mut before = "";
-    let mut op= "";
+    let mut op = "";
 
     for &line in input {
         if line.starts_with("Before") {
@@ -103,7 +105,7 @@ lazy_static! {
 impl Registers {
     fn new(a: i32, b: i32, c: i32, d: i32) -> Registers {
         Registers {
-            inner: (a, b, c, d)
+            inner: (a, b, c, d),
         }
     }
 
@@ -189,13 +191,13 @@ impl OpCode {
             OpCode::EqIr(a, b, c) => res.set(c, if *a == res.get(b) { 1 } else { 0 }),
             OpCode::EqRi(a, b, c) => res.set(c, if res.get(a) == *b { 1 } else { 0 }),
             OpCode::EqRr(a, b, c) => res.set(c, if res.get(a) == res.get(b) { 1 } else { 0 }),
-            _ => {},
+            _ => {}
         }
 
         res
     }
 
-    fn to_default(&self) -> OpCode {
+    fn get_default(&self) -> OpCode {
         match self {
             OpCode::AddR(_, _, _) => OpCode::AddR(0, 0, 0),
             OpCode::AddI(_, _, _) => OpCode::AddI(0, 0, 0),
@@ -239,9 +241,7 @@ impl Sample {
             let b = parse_capture(&cap, 3, "b").unwrap();
             let c = parse_capture(&cap, 4, "c").unwrap();
             let op = (o, a, b, c);
-            Some(Sample {
-                before, after, op
-            })
+            Some(Sample { before, after, op })
         } else {
             None
         }
@@ -251,7 +251,7 @@ impl Sample {
         let mut res = Vec::new();
         let mut t = |o: OpCode| {
             if o.apply(&self.before) == self.after {
-                res.push(o.to_default());
+                res.push(o.get_default());
             }
         };
         t(OpCode::AddR(self.op.1, self.op.2, self.op.3));
@@ -323,8 +323,7 @@ mod test {
 
     #[test]
     fn test_count_ops() {
-        let input = Sample::parse("[3, 2, 1, 1]", "[3, 2, 2, 1]", "9 2 1 2")
-            .unwrap();
+        let input = Sample::parse("[3, 2, 1, 1]", "[3, 2, 2, 1]", "9 2 1 2").unwrap();
 
         assert_eq!(3, input.opcodes().len());
     }

@@ -130,7 +130,7 @@ impl CollectionArea {
             let line = &self.inner[curr_row];
             let minc = if col > 0 { col - 1 } else { col };
             let maxc = if col < line.len() - 1 { col + 1 } else { col };
-            for (curr_col, acre) in line.iter().enumerate().skip(minc).take(maxc) {
+            for (curr_col, acre) in line.iter().enumerate().take(maxc + 1).skip(minc) {
                 if curr_row != row || curr_col != col {
                     res.push(acre);
                 }

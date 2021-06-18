@@ -187,7 +187,7 @@ fn get_carts(input: &[&str]) -> Vec<Cart> {
                 })
             })
         })
-        .filter_map(|c| c)
+        .flatten()
         .collect()
 }
 

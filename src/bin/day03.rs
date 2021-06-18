@@ -50,12 +50,7 @@ fn second(input: &[&str]) -> u32 {
 
     claims
         .iter()
-        .find(|a| {
-            claims
-                .iter()
-                .find(|&b| a.id != b.id && overlap(&a, &b))
-                .is_none()
-        })
+        .find(|a| !claims.iter().any(|b| a.id != b.id && overlap(&a, &b)))
         .unwrap()
         .id as u32
 }

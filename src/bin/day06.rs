@@ -44,10 +44,9 @@ type Point = (i32, i32);
 
 fn inner_region(region: &[Point], limits: (Point, Point)) -> bool {
     let ((minx, miny), (maxx, maxy)) = limits;
-    region
+    !region
         .iter()
-        .find(|p| p.0 == minx || p.0 == maxx || p.1 == miny || p.1 == maxy)
-        .is_none()
+        .any(|p| p.0 == minx || p.0 == maxx || p.1 == miny || p.1 == maxy)
 }
 
 fn build_map(points: &[Point], limits: (Point, Point)) -> HashMap<Point, Vec<Point>> {
