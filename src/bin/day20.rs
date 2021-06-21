@@ -1,4 +1,5 @@
 use adventofcode2018::*;
+use std::collections::HashSet;
 use std::str::Chars;
 
 fn first(input: &str) -> usize {
@@ -19,19 +20,37 @@ fn longest_path(route: &Route) -> usize {
 
 fn second(input: &str) -> usize {
     let routes = Route::parse(input);
-    n_rooms(&routes, 1000).0
+    let mut rooms = HashSet::new();
+    n_rooms(&routes, 999, 0, 0, &mut rooms).0
 }
 
-fn n_rooms(route: &Route, skip_n: usize) -> (usize, usize) {
+fn n_rooms(
+    route: &Route,
+    skip_n: usize,
+    start_x: i32,
+    start_y: i32,
+    seen_rooms: &mut HashSet<(i32, i32)>,
+) -> (usize, usize) {
     let mut to_skip = skip_n;
     let mut rooms = 0;
+    let mut x = start_x;
+    let mut y = start_y;
 
-    println!("start block - left {}", to_skip);
     for r in &route.0 {
         match r {
             RouteElement::Directions(s) => {
-                let block_rooms = s.len();
-                println!("found block <{}> {:?}", block_rooms, s);
+                let mut block_rooms = 0;
+                for dir in s {
+                    match dir {
+                        Direction::N => y += 1,
+                        Direction::W => x -= 1,
+                        Direction::S => y -= 1,
+                        Direction::E => x += 1,
+                    }
+                    if seen_rooms.insert((x, y)) {
+                        block_rooms += 1;
+                    }
+                }
                 if to_skip > block_rooms {
                     to_skip -= block_rooms;
                 } else {
@@ -40,9 +59,10 @@ fn n_rooms(route: &Route, skip_n: usize) -> (usize, usize) {
                 }
             }
             RouteElement::Choice(c) => {
-                println!("found choice");
-                let paths_rooms: Vec<(usize, usize)> =
-                    c.iter().map(|r| n_rooms(r, to_skip)).collect();
+                let paths_rooms: Vec<(usize, usize)> = c
+                    .iter()
+                    .map(|r| n_rooms(r, to_skip, x, y, seen_rooms))
+                    .collect();
                 let skipped = paths_rooms.iter().map(|p| p.1).min();
                 let paths_rooms = paths_rooms.iter().map(|p| p.0).sum::<usize>();
                 if let Some(skipped) = skipped {
@@ -57,7 +77,6 @@ fn n_rooms(route: &Route, skip_n: usize) -> (usize, usize) {
         }
     }
 
-    println!("end block - found {} - left {}", rooms, to_skip);
     (rooms, skip_n - to_skip)
 }
 
