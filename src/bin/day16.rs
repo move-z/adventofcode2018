@@ -1,10 +1,11 @@
-use adventofcode2018::*;
-
-use regex::Regex;
 use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
 
 use lazy_static::lazy_static;
+use regex::Regex;
+
+use adventofcode2018::*;
+use adventofcode2018::machine::*;
 
 fn first(input: &[&str]) -> usize {
     let (samples, _) = parse_file(input);
@@ -57,12 +58,12 @@ fn second(input: &[&str]) -> i32 {
         }
     }
 
-    let mut regs = Registers::new(0, 0, 0, 0);
+    let mut regs = Registers::new([0; 4]);
     for op in ops {
         let op = parse_op(op, &op_by_code);
         regs = op.apply(&regs);
     }
-    regs.inner.0
+    regs.get(&0)
 }
 
 fn parse_file<'a>(input: &[&'a str]) -> (Vec<Sample>, Vec<&'a str>) {
@@ -93,147 +94,35 @@ fn parse_file<'a>(input: &[&'a str]) -> (Vec<Sample>, Vec<&'a str>) {
     (samples, ops)
 }
 
-#[derive(Clone, PartialEq)]
-struct Registers {
-    inner: (i32, i32, i32, i32),
-}
-
-lazy_static! {
-    static ref REGISTERS_RE: Regex = Regex::new(r"\[(\d+), (\d+), (\d+), (\d+)\]").unwrap();
-}
-
-impl Registers {
-    fn new(a: i32, b: i32, c: i32, d: i32) -> Registers {
-        Registers {
-            inner: (a, b, c, d),
-        }
-    }
-
-    fn parse(input: &str) -> Option<Registers> {
-        if let Some(cap) = REGISTERS_RE.captures(input) {
-            let a = parse_capture(&cap, 1, "a").unwrap();
-            let b = parse_capture(&cap, 2, "b").unwrap();
-            let c = parse_capture(&cap, 3, "c").unwrap();
-            let d = parse_capture(&cap, 4, "d").unwrap();
-            Some(Registers {
-                inner: (a, b, c, d),
-            })
-        } else {
-            None
-        }
-    }
-
-    fn get(&self, i: &i32) -> i32 {
-        match i {
-            0 => self.inner.0,
-            1 => self.inner.1,
-            2 => self.inner.2,
-            3 => self.inner.3,
-            _ => 0,
-        }
-    }
-
-    fn set(&mut self, i: &i32, val: i32) {
-        match i {
-            0 => self.inner.0 = val,
-            1 => self.inner.1 = val,
-            2 => self.inner.2 = val,
-            3 => self.inner.3 = val,
-            _ => {}
-        };
-    }
-}
-
-#[derive(Eq, PartialEq, Hash, Clone, Copy, Debug)]
-enum OpCode {
-    AddR(i32, i32, i32),
-    AddI(i32, i32, i32),
-    MulR(i32, i32, i32),
-    MulI(i32, i32, i32),
-    BanR(i32, i32, i32),
-    BanI(i32, i32, i32),
-    BorR(i32, i32, i32),
-    BorI(i32, i32, i32),
-    SetR(i32, i32, i32),
-    SetI(i32, i32, i32),
-    GtIr(i32, i32, i32),
-    GtRi(i32, i32, i32),
-    GtRr(i32, i32, i32),
-    EqIr(i32, i32, i32),
-    EqRi(i32, i32, i32),
-    EqRr(i32, i32, i32),
-    Nop,
-}
-
-impl OpCode {
-    fn apply(&self, input: &Registers) -> Registers {
-        let mut res = input.clone();
-        match self {
-            OpCode::AddR(a, b, c) => res.set(c, res.get(a) + res.get(b)),
-            OpCode::AddI(a, b, c) => res.set(c, res.get(a) + b),
-
-            OpCode::MulR(a, b, c) => res.set(c, res.get(a) * res.get(b)),
-            OpCode::MulI(a, b, c) => res.set(c, res.get(a) * b),
-
-            OpCode::BanR(a, b, c) => res.set(c, res.get(a) & res.get(b)),
-            OpCode::BanI(a, b, c) => res.set(c, res.get(a) & b),
-
-            OpCode::BorR(a, b, c) => res.set(c, res.get(a) | res.get(b)),
-            OpCode::BorI(a, b, c) => res.set(c, res.get(a) | b),
-
-            OpCode::SetR(a, _, c) => res.set(c, res.get(a)),
-            OpCode::SetI(a, _, c) => res.set(c, *a),
-
-            OpCode::GtIr(a, b, c) => res.set(c, if *a > res.get(b) { 1 } else { 0 }),
-            OpCode::GtRi(a, b, c) => res.set(c, if res.get(a) > *b { 1 } else { 0 }),
-            OpCode::GtRr(a, b, c) => res.set(c, if res.get(a) > res.get(b) { 1 } else { 0 }),
-
-            OpCode::EqIr(a, b, c) => res.set(c, if *a == res.get(b) { 1 } else { 0 }),
-            OpCode::EqRi(a, b, c) => res.set(c, if res.get(a) == *b { 1 } else { 0 }),
-            OpCode::EqRr(a, b, c) => res.set(c, if res.get(a) == res.get(b) { 1 } else { 0 }),
-            _ => {}
-        }
-
-        res
-    }
-
-    fn get_default(&self) -> OpCode {
-        match self {
-            OpCode::AddR(_, _, _) => OpCode::AddR(0, 0, 0),
-            OpCode::AddI(_, _, _) => OpCode::AddI(0, 0, 0),
-            OpCode::MulR(_, _, _) => OpCode::MulR(0, 0, 0),
-            OpCode::MulI(_, _, _) => OpCode::MulI(0, 0, 0),
-            OpCode::BanR(_, _, _) => OpCode::BanR(0, 0, 0),
-            OpCode::BanI(_, _, _) => OpCode::BanI(0, 0, 0),
-            OpCode::BorR(_, _, _) => OpCode::BorR(0, 0, 0),
-            OpCode::BorI(_, _, _) => OpCode::BorI(0, 0, 0),
-            OpCode::SetR(_, _, _) => OpCode::SetR(0, 0, 0),
-            OpCode::SetI(_, _, _) => OpCode::SetI(0, 0, 0),
-            OpCode::GtIr(_, _, _) => OpCode::GtIr(0, 0, 0),
-            OpCode::GtRi(_, _, _) => OpCode::GtRi(0, 0, 0),
-            OpCode::GtRr(_, _, _) => OpCode::GtRr(0, 0, 0),
-            OpCode::EqIr(_, _, _) => OpCode::EqIr(0, 0, 0),
-            OpCode::EqRi(_, _, _) => OpCode::EqRi(0, 0, 0),
-            OpCode::EqRr(_, _, _) => OpCode::EqRr(0, 0, 0),
-            _ => *self,
-        }
-    }
-}
+type SmallRegisters = Registers<4>;
 
 struct Sample {
-    before: Registers,
-    after: Registers,
+    before: SmallRegisters,
+    after: SmallRegisters,
     op: (i32, i32, i32, i32),
 }
 
 lazy_static! {
+    static ref REGISTERS_RE: Regex = Regex::new(r"\[(\d+), (\d+), (\d+), (\d+)\]").unwrap();
     static ref OP_RE: Regex = Regex::new(r"(\d+) (\d+) (\d+) (\d+)").unwrap();
+}
+
+fn parse(input: &str) -> Option<SmallRegisters> {
+    if let Some(cap) = REGISTERS_RE.captures(input) {
+        let a = parse_capture(&cap, 1, "a").unwrap();
+        let b = parse_capture(&cap, 2, "b").unwrap();
+        let c = parse_capture(&cap, 3, "c").unwrap();
+        let d = parse_capture(&cap, 4, "d").unwrap();
+        Some(Registers::new([a, b, c, d]))
+    } else {
+        None
+    }
 }
 
 impl Sample {
     fn parse(before: &str, after: &str, op: &str) -> Option<Sample> {
-        let before = Registers::parse(before)?;
-        let after = Registers::parse(after)?;
+        let before = parse(before)?;
+        let after = parse(after)?;
 
         if let Some(cap) = OP_RE.captures(op) {
             let o = parse_capture(&cap, 1, "o").unwrap();

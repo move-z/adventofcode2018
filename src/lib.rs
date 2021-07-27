@@ -1,3 +1,5 @@
+pub mod machine;
+
 use std::fs;
 use std::str::FromStr;
 
