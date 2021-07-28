@@ -1,5 +1,7 @@
+use std::collections::HashSet;
+
 use adventofcode2018::*;
-use crate::machine::*;
+use adventofcode2018::machine::*;
 
 fn first(input: &[&str]) -> i32 {
     let mut machine = Machine::<6>::parse(input);
@@ -12,8 +14,22 @@ fn first(input: &[&str]) -> i32 {
     }
 }
 
-fn second(input: &[&str]) -> usize {
-    todo!()
+fn second(input: &[&str]) -> i32 {
+    let mut machine = Machine::<6>::parse(input);
+    let mut visited = HashSet::new();
+    let mut prev = 0;
+    loop {
+        machine.execute_step();
+
+        if machine.curr_ip() == 28 {
+            let cur = machine.registers.get(&4);
+            if visited.contains(&cur) {
+                return prev;
+            }
+            visited.insert(cur);
+            prev = cur;
+        }
+    }
 }
 
 fn main() {

@@ -66,7 +66,7 @@ impl<const N: usize> Machine<N> {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct Registers<const N: usize> {
     inner: [i32; N],
 }
