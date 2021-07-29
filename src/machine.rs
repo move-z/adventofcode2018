@@ -73,9 +73,7 @@ pub struct Registers<const N: usize> {
 
 impl<const N: usize> Registers<N> {
     pub fn new(inner: [i32; N]) -> Registers<N> {
-        Registers {
-            inner,
-        }
+        Registers { inner }
     }
 
     pub fn get(&self, i: &i32) -> i32 {
@@ -90,9 +88,7 @@ impl<const N: usize> Registers<N> {
     }
 
     fn default() -> Self {
-        Registers {
-            inner: [0; N],
-        }
+        Registers { inner: [0; N] }
     }
 
     pub fn all(&self) -> [i32; N] {

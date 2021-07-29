@@ -1,4 +1,5 @@
 use adventofcode2018::*;
+use std::collections::HashMap;
 
 fn first(depth: u32, target: (usize, usize)) -> u32 {
     let cave = Cave::new(depth, target);
@@ -6,21 +7,149 @@ fn first(depth: u32, target: (usize, usize)) -> u32 {
 }
 
 fn second(depth: u32, target: (usize, usize)) -> u32 {
-    todo!()
+    let limits = (target.0 + 1000, target.1 + 1000);
+    let cave = Cave::bounded(depth, target, limits);
+
+    let start = Location {
+        pos: (0, 0),
+        tool: Tool::Torch,
+        time: 0,
+    };
+    let mut visited = HashMap::new();
+    visited.insert(start.pos, (start.tool, start.time));
+    let mut current_loc = vec![start];
+    let mut new_loc = Vec::new();
+
+    loop {
+        for loc in current_loc {
+            let pos = loc.pos;
+            let mut next_pos = Vec::new();
+
+            if pos.0 > 0 {
+                next_pos.push((pos.0 - 1, pos.1));
+            }
+            if pos.1 > 0 {
+                next_pos.push((pos.0, pos.1 - 1))
+            }
+            if pos.0 < limits.0 {
+                next_pos.push((pos.0 + 1, pos.1));
+            }
+            if pos.1 < limits.1 {
+                next_pos.push((pos.0, pos.1 + 1));
+            }
+
+            let other_tool = valid_tools(cave.region_type(loc.pos));
+            let other_tool = if other_tool[0] == loc.tool {
+                other_tool[1]
+            } else {
+                other_tool[0]
+            };
+
+            for n in next_pos {
+                let valid_tools = valid_tools(cave.region_type(n));
+                let n = if valid_tools.contains(&loc.tool) {
+                    Some(Location {
+                        pos: n,
+                        tool: loc.tool,
+                        time: loc.time + 1,
+                    })
+                } else if valid_tools.contains(&other_tool) {
+                    Some(Location {
+                        pos: n,
+                        tool: other_tool,
+                        time: loc.time + 8,
+                    })
+                } else {
+                    None
+                };
+
+                if let Some(n) = n {
+                    let mut n = n;
+                    if n.pos == target && n.tool != Tool::Torch {
+                        n.time += 7;
+                    }
+
+                    let previous = |(tool, time): &&(Tool, u32)| {
+                        let same_tool = *tool == n.tool && *time <= n.time;
+                        let different_tool = *time + 7 <= n.time;
+                        same_tool || different_tool
+                    };
+
+                    if visited.get(&n.pos).filter(previous).is_some() {
+                        continue;
+                    }
+                    if visited
+                        .get(&target)
+                        .filter(|(_, time)| *time < n.time)
+                        .is_some()
+                    {
+                        continue;
+                    }
+
+                    let mut insert = true;
+                    if let Some((_, t)) = visited.get(&n.pos) {
+                        if *t <= n.time {
+                            insert = false;
+                        }
+                    }
+                    if insert {
+                        visited.insert(n.pos, (n.tool, n.time));
+                    }
+                    new_loc.retain(|l: &Location| {
+                        l.pos != n.pos || (l.tool != n.tool && l.time - 7 < n.time)
+                    });
+                    new_loc.push(n);
+                }
+            }
+        }
+
+        if new_loc.is_empty() {
+            return visited.get(&target).unwrap().1;
+        }
+
+        current_loc = new_loc;
+        new_loc = Vec::new();
+    }
+}
+
+#[derive(Copy, Clone)]
+struct Location {
+    pos: (usize, usize),
+    tool: Tool,
+    time: u32,
+}
+
+#[derive(PartialEq, Eq, Hash, Copy, Clone, Debug)]
+enum Tool {
+    Torch,
+    ClimbingGear,
+    None,
+}
+
+fn valid_tools(t: RegionType) -> [Tool; 2] {
+    match t {
+        RegionType::Rocky => [Tool::Torch, Tool::ClimbingGear],
+        RegionType::Wet => [Tool::ClimbingGear, Tool::None],
+        RegionType::Narrow => [Tool::Torch, Tool::None],
+    }
 }
 
 struct Cave {
-    map: Box<Vec<Vec<u32>>>,
+    map: Vec<Vec<u32>>,
 }
 
 impl Cave {
     fn new(depth: u32, target: (usize, usize)) -> Cave {
-        let mut map: Box<Vec<Vec<u32>>> = Box::new(Vec::with_capacity(target.0 + 1));
+        Cave::bounded(depth, target, target)
+    }
 
-        for x in 0..=target.0 {
-            let mut row = Vec::with_capacity(target.1 + 1);
+    fn bounded(depth: u32, target: (usize, usize), bounds: (usize, usize)) -> Cave {
+        let mut map: Vec<Vec<u32>> = Vec::with_capacity(bounds.0 + 1);
 
-            for y in 0..=target.1 {
+        for x in 0..=bounds.0 {
+            let mut row = Vec::with_capacity(bounds.1 + 1);
+
+            for y in 0..=bounds.1 {
                 let index = match (x, y) {
                     (0, 0) => 0,
                     t if t == target => 0,
@@ -39,14 +168,21 @@ impl Cave {
         Cave { map }
     }
 
+    fn region_type(&self, coord: (usize, usize)) -> RegionType {
+        erosion_to_type(self.map[coord.0][coord.1])
+    }
+
     fn risk_level(&self) -> u32 {
-        self.map.iter().flat_map(|r| r.iter().map(|l| {
-            match erosion_to_type(*l) {
-                RegionType::Wet => 1,
-                RegionType::Narrow => 2,
-                _ => 0,
-            }
-        })).sum()
+        self.map
+            .iter()
+            .flat_map(|r| {
+                r.iter().map(|l| match erosion_to_type(*l) {
+                    RegionType::Wet => 1,
+                    RegionType::Narrow => 2,
+                    _ => 0,
+                })
+            })
+            .sum()
     }
 }
 
@@ -83,6 +219,7 @@ fn main() {
 
     println!("{}", first(depth, target));
     println!("{}", second(depth, target));
+    // second(510, (10, 10));
 
     println!("elapsed {:?}", start.elapsed());
 }
@@ -91,54 +228,15 @@ fn main() {
 mod test {
     use super::*;
 
-    // #[test]
-    // fn test00() {
-    //     let cave = Cave { depth: 510, target: (10, 10) };
-    //     let coord = (0, 0);
-    //     assert_eq!(0, cave.geologic_index(coord));
-    //     assert_eq!(510, cave.erosion_level(coord));
-    //     assert_eq!(RegionType::Rocky, cave.region_type(coord));
-    // }
-    //
-    // #[test]
-    // fn test10() {
-    //     let cave = Cave { depth: 510, target: (10, 10) };
-    //     let coord = (1, 0);
-    //     assert_eq!(16807, cave.geologic_index(coord));
-    //     assert_eq!(17317, cave.erosion_level(coord));
-    //     assert_eq!(RegionType::Wet, cave.region_type(coord));
-    // }
-    //
-    // #[test]
-    // fn test01() {
-    //     let cave = Cave { depth: 510, target: (10, 10) };
-    //     let coord = (0, 1);
-    //     assert_eq!(48271, cave.geologic_index(coord));
-    //     assert_eq!(8415, cave.erosion_level(coord));
-    //     assert_eq!(RegionType::Rocky, cave.region_type(coord));
-    // }
-    //
-    // #[test]
-    // fn test11() {
-    //     let cave = Cave { depth: 510, target: (10, 10) };
-    //     let coord = (1, 1);
-    //     assert_eq!(145722555, cave.geologic_index(coord));
-    //     assert_eq!(1805, cave.erosion_level(coord));
-    //     assert_eq!(RegionType::Narrow, cave.region_type(coord));
-    // }
-    //
-    // #[test]
-    // fn test1010() {
-    //     let cave = Cave { depth: 510, target: (10, 10) };
-    //     let coord = (10, 10);
-    //     assert_eq!(0, cave.geologic_index(coord));
-    //     assert_eq!(510, cave.erosion_level(coord));
-    //     assert_eq!(RegionType::Rocky, cave.region_type(coord));
-    // }
-    //
     #[test]
     fn test1() {
-        let cave = Cave::new(510, (10, 10));
-        assert_eq!(114, cave.risk_level());
+        let res = first(510, (10, 10));
+        assert_eq!(114, res);
+    }
+
+    #[test]
+    fn test2() {
+        let res = second(510, (10, 10));
+        assert_eq!(45, res);
     }
 }

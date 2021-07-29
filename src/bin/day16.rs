@@ -4,8 +4,8 @@ use std::iter::FromIterator;
 use lazy_static::lazy_static;
 use regex::Regex;
 
-use adventofcode2018::*;
 use adventofcode2018::machine::*;
+use adventofcode2018::*;
 
 fn first(input: &[&str]) -> usize {
     let (samples, _) = parse_file(input);

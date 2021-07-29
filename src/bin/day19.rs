@@ -1,5 +1,5 @@
-use adventofcode2018::*;
 use adventofcode2018::machine::*;
+use adventofcode2018::*;
 
 fn first(input: &[&str]) -> usize {
     let mut machine = Machine::<6>::parse(input);
